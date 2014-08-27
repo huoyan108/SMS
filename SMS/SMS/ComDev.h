@@ -23,8 +23,8 @@
 #define  TIMEOUT 1000    //等待时间
 #define  BUFFERSIZE 512		//缓存大小
 
-//回调函数，返回从设备接收到的数据。终端ID，数据内容，长度
-typedef int (*pf) (char * ,char *,int );
+//回调函数，返回从设备接收到的数据。调用者类指针，终端ID，数据内容，长度
+typedef int (*pf) (void *,char * ,char *,int );
 class CComDev
 {
 public:
@@ -33,13 +33,15 @@ public:
 
 	//设置参数	
 	/*
+	*@object   类型  void * 调用者类指针
 	*@nSpeed   类型  int 速率
 	*@param  Dev     类型  char  设备路径
 	*@param  nBits 类型  int 数据位   取值 为 7 或者8
 	*@param  nStop 类型  int 停止位   取值为 1 或者2
 	*@param  nEvent  类型  int  效验类型 取值为N,E,O,,S
 	*/
-	void SetParam(char *Dev, 
+	void SetParam(void* object,
+		char *Dev,
 		int nSpeed, 
 		int nBits, 
 		char nEvent, 
@@ -93,5 +95,7 @@ protected:
 
 	char m_buff[BUFFERSIZE];
 	long m_nBuffLength ;
+
+	void *m_object;
 };
 

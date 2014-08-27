@@ -12,7 +12,7 @@ SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 PROJECT (SMS)
 
 #build files
-SET(SRC_LIST  test.cpp  ComDev.cpp ComUnit.cpp)
+SET(SRC_LIST   test2.cpp ComDev.cpp ComUnit.cpp PareData.cpp UnitsManager.cpp AlarmClock.cpp)
 
 #zhi ding yuan wen jian mu lu 
 #aux_source_directory(. SRC_LIST)

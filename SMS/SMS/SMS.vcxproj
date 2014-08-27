@@ -64,19 +64,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AlarmClock.h" />
+    <ClInclude Include="CNDef.h" />
     <ClInclude Include="ComDev.h" />
-    <ClInclude Include="ComManager.h" />
+    <ClInclude Include="UnitsManager.h" />
     <ClInclude Include="ComUnit.h" />
     <ClInclude Include="MsgStructInfo.h" />
     <ClInclude Include="MyVector.h" />
     <ClInclude Include="PareData.h" />
+    <ClInclude Include="PrintMsg.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AlarmClock.cpp" />
     <ClCompile Include="ComDev.cpp" />
-    <ClCompile Include="ComManager.cpp" />
+    <ClCompile Include="test2.cpp" />
+    <ClCompile Include="UnitsManager.cpp" />
     <ClCompile Include="ComUnit.cpp" />
     <ClCompile Include="MyVector.cpp" />
     <ClCompile Include="PareData.cpp" />
+    <ClCompile Include="PrintMsg.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>

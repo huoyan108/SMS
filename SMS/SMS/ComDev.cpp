@@ -5,7 +5,8 @@ void *threadRecv(void *arg);
 CComDev::CComDev() :m_nFd(0),
 m_RecvPt(0),
 m_RecvDevDataFun(0),
-m_nBuffLength(0)
+m_nBuffLength(0),
+m_object(NULL)
 {
 	bzero(m_cDev, sizeof(m_cDev));
 }
@@ -16,13 +17,15 @@ CComDev::~CComDev()
 }
 
 //设置参数	
-void CComDev::SetParam(char *Dev, 
+void CComDev::SetParam(void* object, 
+	char *Dev,
 	int nSpeed,
 	int nBits, 
 	char nEvent, 
 	int nStop,
 	pf myFun)
 {
+	m_object = object;
 	strcat(m_cDev, Dev);
 	m_nSpeed = nSpeed;
 	m_nBits = nBits;
@@ -30,6 +33,7 @@ void CComDev::SetParam(char *Dev,
 	m_nStop = nStop;
 	m_RecvDevDataFun = myFun;
 }
+
 // 开启通信服务
 int CComDev::Start()
 {
@@ -55,11 +59,12 @@ int CComDev::Stop()
 	/*pthread_exit((void *)3);*/
 	pthread_cancel(m_RecvPt);
 	pthread_join(m_RecvPt, &res);
-	printf("stop thread\n");
+	printf("stop RECV thread\n");
 	//关闭串口
 	CloseDev();
 	return TRUE;
 }
+
 // 字符类型转换为十六进制显示
 int CComDev::CharToHex(char *Dest, int nDestSize,
 	char *Source, int nSourceLength)
@@ -111,6 +116,7 @@ int CComDev::OpenDev(char *Dev)
 	return TRUE;
 
 }
+
 int CComDev::set_opt(int nSpeed, int nBits, char nEvent, int nStop)
 {
 
@@ -209,6 +215,7 @@ int CComDev::set_opt(int nSpeed, int nBits, char nEvent, int nStop)
 	printf("Com set done!\n");
 	return TRUE;
 }
+
 void *threadRecv(void *arg)
 {
 	pthread_detach(pthread_self());
@@ -261,12 +268,13 @@ int CComDev::RecvData()
 		printf("\nCharToHex:Error!");
 	}
 	//存入缓存 或通知 待加
-	m_RecvDevDataFun(m_cDev,m_buff, m_nBuffLength);
+	m_RecvDevDataFun(m_object,m_cDev, m_buff, m_nBuffLength);
 
 	m_nBuffLength = 0;
 
 	return TRUE;
 }
+
 // 等待设备通知
 int CComDev::WaitDevNotif()
 {
@@ -306,7 +314,7 @@ int CComDev::CloseDev()
 
 int CComDev::SendData(char *buff, int size)
 {
-	printf("\nSEND CHAR:%s", buff);
+	printf("SEND CHAR:%s\n", buff);
 
 	if (write(m_nFd, buff, size) != TRUE)
 		return FALSE;
