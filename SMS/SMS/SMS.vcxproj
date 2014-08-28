@@ -67,6 +67,7 @@
     <ClInclude Include="AlarmClock.h" />
     <ClInclude Include="CNDef.h" />
     <ClInclude Include="ComDev.h" />
+    <ClInclude Include="DataBusiness.h" />
     <ClInclude Include="UnitsManager.h" />
     <ClInclude Include="ComUnit.h" />
     <ClInclude Include="MsgStructInfo.h" />
@@ -77,6 +78,7 @@
   <ItemGroup>
     <ClCompile Include="AlarmClock.cpp" />
     <ClCompile Include="ComDev.cpp" />
+    <ClCompile Include="DataBusiness.cpp" />
     <ClCompile Include="test2.cpp" />
     <ClCompile Include="UnitsManager.cpp" />
     <ClCompile Include="ComUnit.cpp" />

@@ -1,9 +1,10 @@
 #pragma once
 #include <map>
 #include <string>
-using namespace std;
+#include <list>
 #include "ComUnit.h"
 #include "AlarmClock.h"
+using namespace std;
 
 class CUnitsManager
 {
@@ -32,10 +33,16 @@ public:
 		char nEvent,
 		int nStop);
 
+	//设置发送信息
+	int SetSendMsg(tagFrameData &Data);
+
+	// 控制设备发送
+	int ControlDevSend(char *Dev/*, char *buff, int size*/);
+
 	//接收设备数据
 	friend int  RecvDevData(char *DevID, char *buff, int  len);
 protected:
-	//硬件单元集合
+	//设备单元集合
 	map <string, CComUnit*>m_devMap;
 
 	//返回数据处理
@@ -46,16 +53,14 @@ protected:
 
 	CAlarmClock m_AlarmClock;
 
-public:
-	// 向设备添加发送信息
-	int SetSendMsg();
-	// 从发送列表获取发送信息
-	int GetSendMsg();
+	//数据发送列表
+	list<tagFrameData> m_dataList;
 
-	// 控制设备发送
-	int ControlDevSend(char *Dev/*, char *buff, int size*/);
+	// 向设备单元添加发送信息
+	int SetDevSendMsg(char *DevID, tagFrameData *pData = NULL);
 
 	// 获取设备
 	int GetComDev(CComUnit** comDevPt, char *Dev);
+
 };
 

@@ -1,10 +1,14 @@
 #include "UnitsManager.h"
 
+//互斥锁
+pthread_mutex_t g_unitsSendData_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+CUnitsManager *g_pComManager = NULL;
 int  RemindFun(char *pId)
 {
+	g_pComManager->ControlDevSend(pId);
 	return TRUE;
 }
-CUnitsManager *g_pComManager = NULL;
 CUnitsManager::CUnitsManager()
 {
 	g_pComManager = this;
@@ -27,18 +31,9 @@ int  FeedBackFun(int nStyle, void *object)
 		{
 			printf("SJREQ\n");
 
-			CComUnit *comDevPt = NULL;
-			if (g_pComManager->GetComDev(&comDevPt, (char *)object) == TRUE)
-			{
-				tagFrameData Data;
-				Data.dwFrameDataLen = 12;
-				Data.pFrameData = { 0x24, 0x49, 0x43, 0x4A, 0x43, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x2B };
-				comDevPt->SetSendMsg(Data);
-
-				g_pComManager->ControlDevSend((char *)object);
-				sleep(10);
-			}
-			
+			g_pComManager->SetDevSendMsg((char *)object);
+			g_pComManager->ControlDevSend((char *)object);
+						
 		}
 		break;
 		case FEEDBACK_ICXX:	//IC信息
@@ -88,7 +83,7 @@ int  FeedBackFun(int nStyle, void *object)
 				{
 					if (memcmp(pFeedBack->Reserve, "TXSQ", 4) == 0)
 					{
-						sprintf(cMsg, "SEND SUCCESS\n");
+						sprintf(cMsg, "TX SUCCESS\n");
 						return TRUE;
 					}
 				}
@@ -160,7 +155,7 @@ int CUnitsManager::AddComDev(char *Dev,
 	}
 
 	m_devMap[Dev] = comDevPt;
-	m_AlarmClock.AddATimer(Dev, 500);
+	m_AlarmClock.AddATimer(Dev, 10);
 	return TRUE;
 }
 
@@ -172,9 +167,13 @@ int CUnitsManager::DelComDev(char *Dev)
 	if (it != m_devMap.end())
 	{
 		CComUnit *comDevPt = it->second;
-		//m_AlarmClock.DelATimer(it->first);
+		char cDevID[20];
+		bzero(cDevID, sizeof(cDevID));
+		strcpy(cDevID, it->first.c_str());
+		m_AlarmClock.DelATimer(cDevID);
 
 		comDevPt->Stop();
+		delete comDevPt;
 		m_devMap.erase(it);
 	}
 	return TRUE;
@@ -208,6 +207,10 @@ int CUnitsManager::ControlDevSend(char *Dev/*, char *buff, int size*/)
 	{
 		CComUnit *comDevPt = it->second;
 	
+		//tagFrameData Data;
+		//Data.dwFrameDataLen = 12;
+		//Data.pFrameData = { 0x24, 0x49, 0x43, 0x4A, 0x43, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x2B };
+		//comDevPt->SetSendMsg(Data);
 		comDevPt->ProcessSendMsg();
 	}
 	return 0;
@@ -215,19 +218,58 @@ int CUnitsManager::ControlDevSend(char *Dev/*, char *buff, int size*/)
 
 
 // 向设备添加发送信息
-int CUnitsManager::SetSendMsg()
+int CUnitsManager::SetDevSendMsg(char *DevID, tagFrameData *pData)
 {
-	return 0;
+	CComUnit *comDevPt = NULL;
+	if (g_pComManager->GetComDev(&comDevPt, DevID) != TRUE)
+	{
+		return FALSE;
+	}
+
+	if (pData != NULL)
+	{
+		if (comDevPt->SetSendMsg(*pData) != TRUE)
+		{
+			return FALSE;
+		}
+		return TRUE;
+	}
+	pthread_mutex_lock(&g_unitsSendData_mutex);
+
+	tagFrameData Data = m_dataList.front();
+	m_dataList.pop_front();
+	pthread_mutex_unlock(&g_unitsSendData_mutex);
+
+	if (comDevPt->SetSendMsg(Data) != TRUE)
+	{
+		return FALSE;
+	}
+	return TRUE;
 }
 
-
-// 从发送列表获取发送信息
-int CUnitsManager::GetSendMsg()
+//设置发送信息
+int CUnitsManager::SetSendMsg(tagFrameData &Data)
 {
-	return 0;
+	pthread_mutex_lock(&g_unitsSendData_mutex);
+
+	//制定的直接放进设备,否则先存在列表
+	if (Data.cDev != NULL)
+	{
+		if (SetDevSendMsg(Data.cDev, &Data) != TRUE)
+		{
+			m_dataList.push_back(Data);
+		}
+
+	}
+	else
+	{
+		m_dataList.push_back(Data);
+	}
+
+	pthread_mutex_unlock(&g_unitsSendData_mutex);
+
+	return TRUE;
 }
-
-
 // 获取设备
 int CUnitsManager::GetComDev(CComUnit** comDevPt, char *Dev)
 {

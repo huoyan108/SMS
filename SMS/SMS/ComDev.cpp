@@ -278,22 +278,29 @@ int CComDev::RecvData()
 // 等待设备通知
 int CComDev::WaitDevNotif()
 {
+	printf("WaitDevNotif\n");
 	int fd; //文件描述符
 	fd = m_nFd;
 
 	int rtv; //存放返回值
 	fd_set fs_read; //读状态数据集
 	struct timeval  timeout;//超时设置参数结构体
-	timeout.tv_usec = TIMEOUT;  //毫秒
+	timeout.tv_usec = 0;  //毫秒
+	timeout.tv_sec = TIMEOUT; //秒
 	FD_ZERO(&fs_read); //数据集清零
+	FD_CLR(fd, &fs_read);
 	FD_SET(fd, &fs_read);//绑定描述符与数据集
 	rtv = select(fd + 1, &fs_read, NULL, NULL, &timeout);//查询改描述符关联设备是否存在数据可读
-	if (rtv < 0)//select函数调用失败
+	//ready = pselect(fd + 1, &readfds, &writefds, &exceptfds,
+	//	timeout, &sigmask);
+	if (rtv == -1)//select函数调用失败
 	{
 		perror("select() Error!");
 	}
 	else if (rtv) //存在可读数据，准备读取
 	{
+		printf("RECV\n");
+
 		RecvData();
 	}
 	else  //超时，其他意外
@@ -314,10 +321,17 @@ int CComDev::CloseDev()
 
 int CComDev::SendData(char *buff, int size)
 {
-	printf("SEND CHAR:%s\n", buff);
 
-	if (write(m_nFd, buff, size) != TRUE)
+	if (write(m_nFd, buff, size) == -1)
+	{
+		printf("SEND ERROR .CHAR:%s\n", buff);
 		return FALSE;
+
+	}
 	else
+	{
+		printf("SEND OK .CHAR:%s\n", buff);
 		return TRUE;
+
+	}
 }

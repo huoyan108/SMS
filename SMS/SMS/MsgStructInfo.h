@@ -61,7 +61,7 @@ enum
 };
 
 /************************************************************************/
-//指挥机到发送                                                      
+//指挥机到分离                                                     
 /************************************************************************/
 typedef struct tagCardInfoRead
 {
@@ -225,5 +225,6 @@ struct tagFrameData
 	unsigned long dwFrameDataLen; //数据长度
 	DATA_FROM_TYPE eFromType; //数据来源
 	char nComID; //串口号
+	char cDev[20];
 };
 #endif

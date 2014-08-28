@@ -1,6 +1,8 @@
 #include "AlarmClock.h"
 
 void *threadProcess(void *arg);
+//互斥锁
+pthread_mutex_t g_alarm_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 CAlarmClock::CAlarmClock() :m_remindFun(0)
 {
@@ -15,8 +17,14 @@ CAlarmClock::~CAlarmClock()
 // 添加一个定时器
 int CAlarmClock::AddATimer(char *pId, unsigned long nTime)
 {
-	printf("AddATimer %s",pId);
-	m_TimerMap.insert(map<char *, unsigned long>::value_type(pId, nTime));
+	printf("AddATimer %s\n",pId);
+	ALARMTAG *pAlarmTag = new ALARMTAG();
+	pAlarmTag->nTimeoOutFlag = -1;
+	pAlarmTag->nDefTime = nTime;
+	
+	pthread_mutex_lock(&g_alarm_mutex);
+	m_TimerMap.insert(map<char *, ALARMTAG *>::value_type(pId, pAlarmTag));
+	pthread_mutex_unlock(&g_alarm_mutex);
 	return TRUE;
 }
 
@@ -24,9 +32,17 @@ int CAlarmClock::AddATimer(char *pId, unsigned long nTime)
 // 删除一个定时器
 int CAlarmClock::DelATimer(char *pId)
 {
-	printf("DelATimer %s", pId);
+	printf("DelATimer %s\n", pId);
 
-	m_TimerMap.erase(pId);
+	pthread_mutex_lock(&g_alarm_mutex);
+	map<char *, ALARMTAG*>::iterator it = m_TimerMap.find(pId);
+	if (it != m_TimerMap.end())
+	{
+		delete it->second;
+		m_TimerMap.erase(pId);
+	}
+	pthread_mutex_unlock(&g_alarm_mutex);
+
 	return TRUE;
 }
 
@@ -38,12 +54,13 @@ int CAlarmClock::Start(Remind remindFun)
 	//开启线程
 	pthread_create(&m_TimerPt, NULL, threadProcess, this);
 
-	return 0;
+	return TRUE;
 }
 
 void *threadProcess(void *arg)
 {
 	pthread_detach(pthread_self());
+	printf("ProcessTimerThreadID: %ld\n", pthread_self());
 
 	int state, oldstate;
 
@@ -53,14 +70,14 @@ void *threadProcess(void *arg)
 	CAlarmClock *me = (CAlarmClock *)arg;
 	while (true)
 	{
-		printf("ProcessTimerThreadID: %d", pthread_self());
 
 		if (me->ProcessTime() != TRUE)
 		{
 			break;
 		}
 		pthread_testcancel();
-
+		//sleep(10);
+		sleep(1);
 	}
 	return NULL;
 }
@@ -72,12 +89,32 @@ int CAlarmClock::Stop()
 	pthread_cancel(m_TimerPt);
 	pthread_join(m_TimerPt, &res);
 	printf("stop TIMER thread\n");
-	return 0;
+	return TRUE;
 }
 
 
 // 进行计时
 int CAlarmClock::ProcessTime()
 {
-	return 0;
+	pthread_mutex_lock(&g_alarm_mutex);
+
+	map<char *, ALARMTAG *>::iterator it = m_TimerMap.begin();
+	for (; it != m_TimerMap.end(); it++)
+	{
+		
+		it->second->nLastTime += 1;
+		unsigned long nLastTimeTemp = it->second->nLastTime;
+		unsigned long nDefTime = it->second->nDefTime;
+		
+		//if (it->second->nDefTime <= it->second->nLastTime)
+		if (nDefTime <= nLastTimeTemp)
+		{
+			m_remindFun(it->first);
+			it->second->nLastTime = 0;
+		}
+	}
+
+	pthread_mutex_unlock(&g_alarm_mutex);
+
+	return TRUE;
 }

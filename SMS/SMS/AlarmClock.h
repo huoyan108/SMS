@@ -1,12 +1,20 @@
 #pragma once
 #include <map>
 #include <stdio.h>
+#include   <unistd.h>
+//#include   <system.h>
 #include <pthread.h>
 using namespace std;
 
 #define FALSE -1
 #define TRUE 0
 typedef int(*Remind) (char *pId);
+struct ALARMTAG
+{
+	int nTimeoOutFlag;
+	unsigned long nDefTime;
+	unsigned long nLastTime;
+};
 class CAlarmClock
 {
 public:
@@ -25,9 +33,8 @@ public:
 	//到点提醒
 	Remind m_remindFun;
 	//定时器集合
-	map<char *, unsigned long> m_TimerMap;
+	map<char *, ALARMTAG *> m_TimerMap;
 	//接收线程句柄
 	pthread_t m_TimerPt;		
-
 };
 

@@ -42,6 +42,9 @@
     <ClInclude Include="AlarmClock.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="DataBusiness.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ComDev.cpp">
@@ -69,6 +72,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="AlarmClock.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DataBusiness.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

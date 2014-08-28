@@ -20,7 +20,7 @@
 #include <string.h>
 #define FALSE -1
 #define TRUE 0
-#define  TIMEOUT 1000    //等待时间
+#define  TIMEOUT 2    //等待时间2秒
 #define  BUFFERSIZE 512		//缓存大小
 
 //回调函数，返回从设备接收到的数据。调用者类指针，终端ID，数据内容，长度
