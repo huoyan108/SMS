@@ -10,7 +10,7 @@ public:
 	CDataBusiness();
 	~CDataBusiness();
 	// 设置业务数据
-	int SetBusiessData(tagFrameData *pFrameData);
+	int SetBusiessData(tagFrameData *pTagFrameData);
 	//设置回执结果数据
 	int SetFeedResData();
 	//开启处理线程，打包解包推送

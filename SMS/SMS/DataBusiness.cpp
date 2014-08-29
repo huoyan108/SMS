@@ -8,8 +8,11 @@ void *threadBusiess(void *arg);
 
 void GetCommInfoMsg(CommInfo& stCommInfo, string& strCommInfo)
 {
-	strCommInfo.Format("发送时间:[%d]时[%d]分[%d]秒  ", stCommInfo.CommHour, stCommInfo.CommMin, stCommInfo.CommSecond);
+	char ctemp[256] = { 0 };
+	sprintf(ctemp, "发送时间:[%d]时[%d]分[%d]秒  ", stCommInfo.CommHour, stCommInfo.CommMin, stCommInfo.CommSecond);
+	string sTemp(ctemp);
 
+	strCommInfo += sTemp;
 	switch (stCommInfo.ifBCD)
 	{
 	case 0:
@@ -33,10 +36,10 @@ void GetCommInfoMsg(CommInfo& stCommInfo, string& strCommInfo)
 	else
 		strCommInfo += "__加急]";
 
-	CString strMsg;
-	strMsg.Format("  电文内容:[%d]字节 [%s]", stCommInfo.CommLenByte, stCommInfo.CommBuff);
-
-	strCommInfo += strMsg;
+	
+	sprintf(ctemp, "  电文内容:[%d]字节 [%s] ", stCommInfo.CommLenByte, stCommInfo.CommBuff);
+	string sTemp2(ctemp);
+	strCommInfo += sTemp2;
 }
 
 CDataBusiness::CDataBusiness()
@@ -77,10 +80,10 @@ int CDataBusiness::ProcessBusiess()
 	//1、解析BD通信信息
 	list<tagFrameData *> dataList;
 
-	pthread_mutex_lock(&g_busiess_mutex);
+	pthread_mutex_lock(&g_busiessData_mutex);
 	dataList.insert(dataList.begin(), m_dataList.begin(), m_dataList.end());
 	m_dataList.clear();
-	pthread_mutex_unlock(&g_busiess_mutex);
+	pthread_mutex_unlock(&g_busiessData_mutex);
 
 	char pExplainData[1000];
 	unsigned long dwExplLen;
@@ -88,7 +91,8 @@ int CDataBusiness::ProcessBusiess()
 	{
 		for (list<tagFrameData *>::iterator it = m_dataList.begin();  it != m_dataList.end(); it++)
 		{
-			if (parseData.ExplainData_UDP(it, pExplainData, dwExplLen))
+			tagFrameData * p = *it;
+			if (parseData.ExplainData_UDP(p->pFrameData, pExplainData, dwExplLen))
 			{
 				CommInfo stCommInfo;
 				stCommInfo = *(CommInfo*)pExplainData;
@@ -99,7 +103,7 @@ int CDataBusiness::ProcessBusiess()
 
 				//显示信息
 				GetCommInfoMsg(stCommInfo, sMsg);
-				printf("%s\n", sMsg);
+				printf("%s\n", sMsg.c_str());
 			}
 
 		}
@@ -111,11 +115,11 @@ int CDataBusiness::ProcessBusiess()
 	return TRUE;
 }
 // 设置业务数据
-int CDataBusiness::SetBusiessData(tagFrameData *pFrameData)
+int CDataBusiness::SetBusiessData(tagFrameData *pTagFrameData)
 {
-	pthread_mutex_lock(&g_busiess_mutex);
+	pthread_mutex_lock(&g_busiessData_mutex);
 	m_dataList.push_back(pTagFrameData);
-	pthread_mutex_unlock(&g_busiess_mutex);
+	pthread_mutex_unlock(&g_busiessData_mutex);
 
 
 

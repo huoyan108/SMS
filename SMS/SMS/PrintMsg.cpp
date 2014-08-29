@@ -12,5 +12,5 @@ CPrintMsg::~CPrintMsg()
 
 void PrintMsg(string sMsg)
 {
-	printf("%s\n", sMsg);
+	//printf("%s\n", sMsg);
 }
