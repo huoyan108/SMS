@@ -45,6 +45,9 @@
     <ClInclude Include="DataBusiness.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="DataTransfer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ComDev.cpp">
@@ -75,6 +78,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="DataBusiness.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="DataTransfer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test3.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -15,6 +15,9 @@ struct _SEND_DATA_TAG
 
 #define PROCESS_FRAME_DATA_LENGTH  1024*7 //数据处理帧长度
 
+#define FSF_LEGHTH 100  //发送方占位长度
+
+#define SJCD_LEGHT 2 //数据长度占位长度
 enum DATA_FROM_TYPE
 {
 	DATA_FROM_TCP = 1, //TCP连接发送的数据
@@ -142,7 +145,7 @@ typedef struct  tagPosInfo
 	unsigned long Ef;		//高程异常
 }PosInfo, *lpPosInfo;
 
-//通信信息
+//通信信息（从中转接收到）
 typedef struct tagCommInfo
 {
 	unsigned long LocalID;	//本机ID(接收方ID，含子用户)
