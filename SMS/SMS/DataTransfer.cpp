@@ -1,11 +1,12 @@
 #include "DataTransfer.h"
 
 void *threadZMQRecv(void *arg);
-
+CDataTransfer *g_pDatatransfer = NULL;
 CDataTransfer::CDataTransfer() :m_pResponder(NULL),
 m_pRequester(NULL),
 m_ZMQRecvPt(0)
 {
+	g_pDatatransfer = this;
 }
 
 
@@ -69,7 +70,7 @@ int CDataTransfer::RecvData()
 		int rt = zmq_poll(items, 1, -1);
 		if (items[0].revents&ZMQ_POLLIN)
 		{
-			tagFrameData *pTagFrameData = new tagFrameData();
+			CommInfo *pCommInfo = new CommInfo();
 			zmq_msg_t request;
 			zmq_msg_init(&request);
 			zmq_msg_recv(&request, m_pRequester, 0);
@@ -81,12 +82,12 @@ int CDataTransfer::RecvData()
 			bzero(sSendSource, sizeof(sSendSource));
 			memcpy(sSendSource, zmq_msg_data(&request), FSF_LEGHTH);
 
-			pTagFrameData->dwFrameDataLen = nTotalLen - FSF_LEGHTH - SJCD_LEGHT;
-			memcpy(pTagFrameData->pFrameData, zmq_msg_data(&request) + FSF_LEGHTH + SJCD_LEGHT, PROCESS_FRAME_DATA_LENGTH);
+			pCommInfo->dwFrameDataLen = nTotalLen - FSF_LEGHTH - SJCD_LEGHT;
+			memcpy(pCommInfo->pFrameData, zmq_msg_data(&request) + FSF_LEGHTH + SJCD_LEGHT, PROCESS_FRAME_DATA_LENGTH);
 			printf("ZMQReceived\n");
 
 			//存入数据处理列表
-			m_business.SetBusiessData(pTagFrameData);
+			m_business.SetBusiessData(pCommInfo);
 			zmq_msg_close(&request);
 		}
 	}

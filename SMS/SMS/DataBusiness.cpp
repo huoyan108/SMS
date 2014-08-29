@@ -5,6 +5,7 @@ pthread_mutex_t g_busiessData_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t g_FeedData_mutex = PTHREAD_MUTEX_INITIALIZER;
 extern CUnitsManager *g_pComManager;
 void *threadBusiess(void *arg);
+extern CDataTransfer *g_pDatatransfer = NULL;
 
 void GetCommInfoMsg(CommInfo& stCommInfo, string& strCommInfo)
 {
@@ -78,8 +79,9 @@ int CDataBusiness::ProcessBusiess()
 {
 	string sMsg = "";
 	//1、解析BD通信信息
-	list<tagFrameData *> dataList;
+	list<CommInfo *> dataList;
 
+	//獲取數據
 	pthread_mutex_lock(&g_busiessData_mutex);
 	dataList.insert(dataList.begin(), m_dataList.begin(), m_dataList.end());
 	m_dataList.clear();
@@ -87,50 +89,68 @@ int CDataBusiness::ProcessBusiess()
 
 	char pExplainData[1000];
 	unsigned long dwExplLen;
-	if (dataList.size() > 0)
+
+	while (!dataList.empty())
 	{
-		for (list<tagFrameData *>::iterator it = m_dataList.begin();  it != m_dataList.end(); it++)
+		CommInfo * p = dataList.front();
+		if (parseData.ExplainData_UDP(p->pFrameData, pExplainData, dwExplLen))
 		{
-			tagFrameData * p = *it;
-			if (parseData.ExplainData_UDP(p->pFrameData, pExplainData, dwExplLen))
-			{
-				CommInfo stCommInfo;
-				stCommInfo = *(CommInfo*)pExplainData;
-				//存入数据库(待加)
+			CommInfo stCommInfo;
+			stCommInfo = *(CommInfo*)pExplainData;
+			//存入数据库(待加)
 
-				//解析存入控制模块
-				g_pComManager->SetSendMsg(stCommInfo);
+			//解析存入控制模块
+			g_pComManager->SetSendMsg(stCommInfo);
 
-				//显示信息
-				GetCommInfoMsg(stCommInfo, sMsg);
-				printf("%s\n", sMsg.c_str());
-			}
-
+			//显示信息
+			GetCommInfoMsg(stCommInfo, sMsg);
+			printf("%s\n", sMsg.c_str());
 		}
+
+		delete p->pFrameData;
+		dataList.pop_front();
 	}
 
 
-	//2、打包通信反馈信息
 
+	//2、打包通信反馈信息
+	//獲取數據
+	list<FeedbackInfo> resdataList;
+
+	pthread_mutex_lock(&g_FeedData_mutex);
+	resdataList.insert(resdataList.begin(), m_ResdataList.begin(), m_ResdataList.end());
+	m_ResdataList.clear();
+	pthread_mutex_unlock(&g_FeedData_mutex);
+
+	char cSendBuff[1024];
+	bzero(cSendBuff, sizeof(cSendBuff));
+	unsigned long nSendLength;
+	while (!resdataList.empty())
+	{
+		CommInfo  FeedbackInfo = resdataList.front();
+		parseData.SendToDS_FKXX(FeedbackInfo, cSendBuff,nSendLength);
+		if (g_pDatatransfer != NULL)
+		{
+			g_pDatatransfer->SendData(cSendBuff, nSendLength);
+		}
+	}
 	return TRUE;
 }
 // 设置业务数据
-int CDataBusiness::SetBusiessData(tagFrameData *pTagFrameData)
+int CDataBusiness::SetBusiessData(CommInfo *pCommInfo)
 {
 	pthread_mutex_lock(&g_busiessData_mutex);
-	m_dataList.push_back(pTagFrameData);
+	m_dataList.push_back(pCommInfo);
 	pthread_mutex_unlock(&g_busiessData_mutex);
-
-
 
 	return 0;
 }
 
 //设置反馈
-int CDataBusiness::SetFeedResData()
+int CDataBusiness::SetFeedResData(FeedbackInfo &stBackInfo)
 {
 	pthread_mutex_lock(&g_FeedData_mutex);
-	//m_ResdataList
+	m_ResdataList.push_back(stBackInfo);
 	pthread_mutex_unlock(&g_FeedData_mutex);
 
 	return 0;

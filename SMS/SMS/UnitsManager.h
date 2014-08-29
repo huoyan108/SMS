@@ -34,7 +34,7 @@ public:
 		int nStop);
 
 	//设置发送信息
-	int SetSendMsg(tagFrameData &Data);
+	int SetSendMsg(CommInfo &Data);
 
 	// 控制设备发送
 	int ControlDevSend(char *Dev/*, char *buff, int size*/);
@@ -54,10 +54,10 @@ protected:
 	CAlarmClock m_AlarmClock;
 
 	//数据发送列表
-	list<tagFrameData> m_dataList;
+	list<CommInfo> m_dataList;
 
 	// 向设备单元添加发送信息
-	int SetDevSendMsg(char *DevID, tagFrameData *pData = NULL);
+	int SetDevSendMsg(char *DevID, CommInfo *pData = NULL);
 
 	// 获取设备
 	int GetComDev(CComUnit** comDevPt, char *Dev);

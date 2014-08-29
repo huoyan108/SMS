@@ -207,7 +207,7 @@ int CUnitsManager::ControlDevSend(char *Dev/*, char *buff, int size*/)
 	{
 		CComUnit *comDevPt = it->second;
 	
-		//tagFrameData Data;
+		//CommInfo Data;
 		//Data.dwFrameDataLen = 12;
 		//Data.pFrameData = { 0x24, 0x49, 0x43, 0x4A, 0x43, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x2B };
 		//comDevPt->SetSendMsg(Data);
@@ -218,7 +218,7 @@ int CUnitsManager::ControlDevSend(char *Dev/*, char *buff, int size*/)
 
 
 // 向设备添加发送信息
-int CUnitsManager::SetDevSendMsg(char *DevID, tagFrameData *pData)
+int CUnitsManager::SetDevSendMsg(char *DevID, CommInfo *pData)
 {
 	CComUnit *comDevPt = NULL;
 	if (g_pComManager->GetComDev(&comDevPt, DevID) != TRUE)
@@ -236,7 +236,7 @@ int CUnitsManager::SetDevSendMsg(char *DevID, tagFrameData *pData)
 	}
 	pthread_mutex_lock(&g_unitsSendData_mutex);
 
-	tagFrameData Data = m_dataList.front();
+	CommInfo Data = m_dataList.front();
 	m_dataList.pop_front();
 	pthread_mutex_unlock(&g_unitsSendData_mutex);
 
@@ -248,7 +248,7 @@ int CUnitsManager::SetDevSendMsg(char *DevID, tagFrameData *pData)
 }
 
 //设置发送信息
-int CUnitsManager::SetSendMsg(tagFrameData &Data)
+int CUnitsManager::SetSendMsg(CommInfo &Data)
 {
 	pthread_mutex_lock(&g_unitsSendData_mutex);
 
