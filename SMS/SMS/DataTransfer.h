@@ -3,10 +3,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
-#include "DataBusiness.h"
+#include "MsgStructInfo.h"
 using namespace std;
 #define FALSE -1
 #define TRUE 0
+typedef int(*zmqNotif) (char *, void *);
 
 class CDataTransfer
 {
@@ -14,7 +15,7 @@ public:
 	CDataTransfer();
 	~CDataTransfer();
 	// 开启服务
-	int StartZmq(int nRequest, int nRespondPort);
+	int StartZmq(int nRequest, int nRespondPort, zmqNotif notifFun);
 	// 关闭服务
 	int CloseZmq();
 
@@ -23,6 +24,8 @@ public:
 
 	// 发送数据
 	int SendData(char *buff, unsigned long length);
+
+	zmqNotif m_notifFun;
 protected:
 
 
@@ -36,6 +39,5 @@ protected:
 
 	pthread_t m_ZMQRecvPt;
 
-	CDataBusiness m_business;
 };
 

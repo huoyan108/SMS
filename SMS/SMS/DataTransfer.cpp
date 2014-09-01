@@ -1,12 +1,13 @@
 #include "DataTransfer.h"
 
 void *threadZMQRecv(void *arg);
-CDataTransfer *g_pDatatransfer = NULL;
+//CDataTransfer *g_pDatatransfer = NULL;
 CDataTransfer::CDataTransfer() :m_pResponder(NULL),
 m_pRequester(NULL),
-m_ZMQRecvPt(0)
+m_ZMQRecvPt(0),
+m_notifFun(0)
 {
-	g_pDatatransfer = this;
+	//g_pDatatransfer = this;
 }
 
 
@@ -16,26 +17,29 @@ CDataTransfer::~CDataTransfer()
 
 
 // 初始化ZMQ
-int CDataTransfer::StartZmq(int nRequest, int nRespondPort)
+int CDataTransfer::StartZmq(int nRequest, int nRespondPort, zmqNotif notifFun)
 {
-	char addr[16] = { 0 };
+	char addr[100] = { 0 };
 	bzero(addr, sizeof(addr));
 
 	m_context = zmq_init(2);
+	//m_context = zmq_ctx_new();
 
 	//接收
 	m_pRequester = zmq_socket(m_context, ZMQ_PULL);
-	sprintf(addr, "tcp://*:%s", nRequest);
+	sprintf(addr, "tcp://*:%d", nRequest);
 	zmq_bind(m_pRequester, addr);
 
 	//发送
 	m_pResponder = zmq_socket(m_context, ZMQ_PUSH);
-	sprintf(addr, "tcp://*:%s", nRespondPort);
+	sprintf(addr, "tcp://*:%d", nRespondPort);
 	zmq_bind(m_pResponder, addr);
 	
 
 	//创建接收线程
 	pthread_create(&m_ZMQRecvPt, NULL, threadZMQRecv, this);
+
+	m_notifFun = notifFun;
 	return 0;
 }
 
@@ -67,10 +71,12 @@ int CDataTransfer::RecvData()
 	zmq_pollitem_t items[] = { { m_pRequester, 0, ZMQ_POLLIN, -1 } };
 	while (TRUE)
 	{
-		int rt = zmq_poll(items, 1, -1);
+		int rt = zmq_poll(items, 1, 1);
 		if (items[0].revents&ZMQ_POLLIN)
 		{
-			CommInfo *pCommInfo = new CommInfo();
+			printf("zmq recv\n");
+
+			CommReq *pCommReq = new CommReq();
 			zmq_msg_t request;
 			zmq_msg_init(&request);
 			zmq_msg_recv(&request, m_pRequester, 0);
@@ -82,12 +88,13 @@ int CDataTransfer::RecvData()
 			bzero(sSendSource, sizeof(sSendSource));
 			memcpy(sSendSource, zmq_msg_data(&request), FSF_LEGHTH);
 
-			pCommInfo->dwFrameDataLen = nTotalLen - FSF_LEGHTH - SJCD_LEGHT;
-			memcpy(pCommInfo->pFrameData, zmq_msg_data(&request) + FSF_LEGHTH + SJCD_LEGHT, PROCESS_FRAME_DATA_LENGTH);
+			//pCommReq->dwFrameDataLen = nTotalLen - FSF_LEGHTH - SJCD_LEGHT;
+			memcpy(pCommReq, zmq_msg_data(&request) + FSF_LEGHTH + SJCD_LEGHT, PROCESS_FRAME_DATA_LENGTH);
 			printf("ZMQReceived\n");
 
 			//存入数据处理列表
-			m_business.SetBusiessData(pCommInfo);
+			//m_business.SetBusiessData(pCommReq);
+			m_notifFun(sSendSource, (void *)pCommReq);
 			zmq_msg_close(&request);
 		}
 	}

@@ -5,48 +5,19 @@ pthread_mutex_t g_busiessData_mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_mutex_t g_FeedData_mutex = PTHREAD_MUTEX_INITIALIZER;
 extern CUnitsManager *g_pComManager;
 void *threadBusiess(void *arg);
-extern CDataTransfer *g_pDatatransfer = NULL;
-
-void GetCommInfoMsg(CommInfo& stCommInfo, string& strCommInfo)
+//extern CDataTransfer *g_pDatatransfer = NULL;
+CDataBusiness * g_pDataBusiness = NULL;
+int NotifFun(char * sendName, void *pReq)
 {
-	char ctemp[256] = { 0 };
-	sprintf(ctemp, "发送时间:[%d]时[%d]分[%d]秒  ", stCommInfo.CommHour, stCommInfo.CommMin, stCommInfo.CommSecond);
-	string sTemp(ctemp);
-
-	strCommInfo += sTemp;
-	switch (stCommInfo.ifBCD)
-	{
-	case 0:
-		strCommInfo += "[汉字";
-		break;
-	case 1:
-		strCommInfo += "[代码";
-		break;
-	case 2:
-		strCommInfo += "[混发";
-		break;
-	}
-
-	if (stCommInfo.ifSecret)
-		strCommInfo += "__加密";
-	else
-		strCommInfo += "__非密";
-
-	if (stCommInfo.ifUrgent)
-		strCommInfo += "__普通]";
-	else
-		strCommInfo += "__加急]";
-
-	
-	sprintf(ctemp, "  电文内容:[%d]字节 [%s] ", stCommInfo.CommLenByte, stCommInfo.CommBuff);
-	string sTemp2(ctemp);
-	strCommInfo += sTemp2;
+	g_pDataBusiness->SetBusiessData((CommReq *)pReq);
 }
 
 CDataBusiness::CDataBusiness()
 {
+	g_pDataBusiness = this;
 	pthread_create(&m_DataBusinessPt, NULL, threadBusiess, this);
 
+	m_treansfer.StartZmq(10001, 20001, NotifFun);
 }
 
 
@@ -71,52 +42,46 @@ void *threadBusiess(void *arg)
 			break;
 		}
 		pthread_testcancel();
-
+		sleep(1);
 	}
 	return NULL;
 }
 int CDataBusiness::ProcessBusiess()
 {
-	string sMsg = "";
-	//1、解析BD通信信息
-	list<CommInfo *> dataList;
+	//string sMsg = "";
+	////1、解析BD通信信息
+	//list<CommReq *> dataList;
 
-	//獲取數據
-	pthread_mutex_lock(&g_busiessData_mutex);
-	dataList.insert(dataList.begin(), m_dataList.begin(), m_dataList.end());
-	m_dataList.clear();
-	pthread_mutex_unlock(&g_busiessData_mutex);
+	////獲取數據
+	//pthread_mutex_lock(&g_busiessData_mutex);
+	//dataList.insert(dataList.begin(), m_dataList.begin(), m_dataList.end());
+	//m_dataList.clear();
+	//pthread_mutex_unlock(&g_busiessData_mutex);
 
-	char pExplainData[1000];
-	unsigned long dwExplLen;
+	//char pExplainData[1000];
+	//unsigned long dwExplLen;
 
-	while (!dataList.empty())
-	{
-		CommInfo * p = dataList.front();
-		if (parseData.ExplainData_UDP(p->pFrameData, pExplainData, dwExplLen))
-		{
-			CommInfo stCommInfo;
-			stCommInfo = *(CommInfo*)pExplainData;
-			//存入数据库(待加)
+	//while (!dataList.empty())
+	//{
+	//	CommReq * p = dataList.front();
+	//
+	//		//存入数据库(待加)
 
-			//解析存入控制模块
-			g_pComManager->SetSendMsg(stCommInfo);
+	//		//解析存入控制模块
+	//		g_pComManager->SetSendMsg(stCommInfo);
 
-			//显示信息
-			GetCommInfoMsg(stCommInfo, sMsg);
-			printf("%s\n", sMsg.c_str());
-		}
+	//		//显示信息
 
-		delete p->pFrameData;
-		dataList.pop_front();
-	}
+
+	//	delete p;
+	//	dataList.pop_front();
+	//}
 
 
 
 	//2、打包通信反馈信息
 	//獲取數據
 	list<FeedbackInfo> resdataList;
-
 	pthread_mutex_lock(&g_FeedData_mutex);
 	resdataList.insert(resdataList.begin(), m_ResdataList.begin(), m_ResdataList.end());
 	m_ResdataList.clear();
@@ -127,22 +92,24 @@ int CDataBusiness::ProcessBusiess()
 	unsigned long nSendLength;
 	while (!resdataList.empty())
 	{
-		CommInfo  FeedbackInfo = resdataList.front();
-		parseData.SendToDS_FKXX(FeedbackInfo, cSendBuff,nSendLength);
-		if (g_pDatatransfer != NULL)
-		{
-			g_pDatatransfer->SendData(cSendBuff, nSendLength);
-		}
+		printf("send Feedback\n");
+
+		FeedbackInfo  FeedbackInfo = resdataList.front();
+		//parseData.SendToDS_FKXX(FeedbackInfo, cSendBuff,nSendLength);
+		//m_treansfer.SendData(cSendBuff, nSendLength);
 	}
 	return TRUE;
 }
 // 设置业务数据
-int CDataBusiness::SetBusiessData(CommInfo *pCommInfo)
+int CDataBusiness::SetBusiessData(CommReq *pCommReq)
 {
-	pthread_mutex_lock(&g_busiessData_mutex);
-	m_dataList.push_back(pCommInfo);
-	pthread_mutex_unlock(&g_busiessData_mutex);
+	//pthread_mutex_lock(&g_busiessData_mutex);
+	//m_dataList.push_back(pCommReq);
+	//pthread_mutex_unlock(&g_busiessData_mutex);
+	//存入数据库(待加)
 
+	//解析存入控制模块
+	g_pComManager->SetSendMsg(*pCommReq);
 	return 0;
 }
 

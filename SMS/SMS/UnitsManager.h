@@ -4,6 +4,7 @@
 #include <list>
 #include "ComUnit.h"
 #include "AlarmClock.h"
+#include "PareData.h"
 using namespace std;
 
 class CUnitsManager
@@ -34,7 +35,7 @@ public:
 		int nStop);
 
 	//设置发送信息
-	int SetSendMsg(CommInfo &Data);
+	int SetSendMsg(CommReq &Data);
 
 	// 控制设备发送
 	int ControlDevSend(char *Dev/*, char *buff, int size*/);
@@ -53,14 +54,21 @@ protected:
 
 	CAlarmClock m_AlarmClock;
 
-	//数据发送列表
-	list<CommInfo> m_dataList;
+	CPareData m_parse;
 
-	// 向设备单元添加发送信息
-	int SetDevSendMsg(char *DevID, CommInfo *pData = NULL);
+	//数据发送列表
+	list<CommReq> m_dataList;
+
+	// 向设备单元添加发送信息,如果pData为空，从列表获取
+	int SetDevSendMsg(char *DevID, CommReq *pData = NULL);
 
 	// 获取设备
 	int GetComDev(CComUnit** comDevPt, char *Dev);
 
+public:
+	// IC卡自检
+	int SendICJC(char *Dev);
+	// 系统自检
+	int SendXTZJ(char *Dev, int nZJPD);
 };
 

@@ -169,6 +169,8 @@ typedef struct tagCommInfo
 typedef struct tagCommReq
 {
 	unsigned long LocalID;
+	unsigned long SourceAddress;		//接收方地址
+
 	unsigned long DestAddress;		//接收方地址
 	unsigned long InfoLen;			//数据长度(单位：Bit)  不能传字节数，因为BCD可能不是整字节
 	char  InfoBuff[211];	//汉字:Max 120个  BCD:Max 420

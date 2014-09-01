@@ -207,7 +207,7 @@ int CUnitsManager::ControlDevSend(char *Dev/*, char *buff, int size*/)
 	{
 		CComUnit *comDevPt = it->second;
 	
-		//CommInfo Data;
+		//CommReq Data;
 		//Data.dwFrameDataLen = 12;
 		//Data.pFrameData = { 0x24, 0x49, 0x43, 0x4A, 0x43, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x2B };
 		//comDevPt->SetSendMsg(Data);
@@ -218,17 +218,19 @@ int CUnitsManager::ControlDevSend(char *Dev/*, char *buff, int size*/)
 
 
 // 向设备添加发送信息
-int CUnitsManager::SetDevSendMsg(char *DevID, CommInfo *pData)
+int CUnitsManager::SetDevSendMsg(char *DevID, CommReq *pData)
 {
 	CComUnit *comDevPt = NULL;
 	if (g_pComManager->GetComDev(&comDevPt, DevID) != TRUE)
 	{
 		return FALSE;
 	}
-
+	tagFrameData FrameData;
+	memcpy(FrameData.pFrameData, pData->InfoBuff, pData->InfoLen);
+	FrameData.dwFrameDataLen = pData->InfoLen;
 	if (pData != NULL)
 	{
-		if (comDevPt->SetSendMsg(*pData) != TRUE)
+		if (comDevPt->SetSendMsg(FrameData) != TRUE)
 		{
 			return FALSE;
 		}
@@ -236,11 +238,14 @@ int CUnitsManager::SetDevSendMsg(char *DevID, CommInfo *pData)
 	}
 	pthread_mutex_lock(&g_unitsSendData_mutex);
 
-	CommInfo Data = m_dataList.front();
+	CommReq Data = m_dataList.front();
 	m_dataList.pop_front();
 	pthread_mutex_unlock(&g_unitsSendData_mutex);
 
-	if (comDevPt->SetSendMsg(Data) != TRUE)
+	memcpy(FrameData.pFrameData, Data.InfoBuff, Data.InfoLen);
+	FrameData.dwFrameDataLen = Data.InfoLen;
+
+	if (comDevPt->SetSendMsg(FrameData) != TRUE)
 	{
 		return FALSE;
 	}
@@ -248,20 +253,22 @@ int CUnitsManager::SetDevSendMsg(char *DevID, CommInfo *pData)
 }
 
 //设置发送信息
-int CUnitsManager::SetSendMsg(CommInfo &Data)
+int CUnitsManager::SetSendMsg(CommReq &Data)
 {
+	//打包发送请求数据
+
 	pthread_mutex_lock(&g_unitsSendData_mutex);
 
 	//制定的直接放进设备,否则先存在列表
-	if (Data.cDev != NULL)
-	{
-		if (SetDevSendMsg(Data.cDev, &Data) != TRUE)
-		{
-			m_dataList.push_back(Data);
-		}
+	//if (Data.SourceAddress <= 0)
+	//{
+	//	if (SetDevSendMsg(Data.cDev, &Data) != TRUE)
+	//	{
+	//		m_dataList.push_back(Data);
+	//	}
 
-	}
-	else
+	//}
+	//else
 	{
 		m_dataList.push_back(Data);
 	}
@@ -280,4 +287,46 @@ int CUnitsManager::GetComDev(CComUnit** comDevPt, char *Dev)
 		return TRUE;
 	}
 	return FALSE;
+}
+
+
+// IC卡自检
+int CUnitsManager::SendICJC(char *Dev)
+{
+	tagFrameData Data;
+	Data.dwFrameDataLen = m_parse.SendToBd_ICJC(0, 0, Data.pFrameData);
+
+	CComUnit *comDevPt = NULL;
+	if (g_pComManager->GetComDev(&comDevPt, Dev) != TRUE)
+	{
+		return FALSE;
+	}
+	if (comDevPt->SetSendMsg(Data) != TRUE)
+	{
+		return FALSE;
+	}
+	comDevPt->ProcessSendMsg();
+
+	return TRUE;
+
+}
+
+
+// 系统自检
+int CUnitsManager::SendXTZJ(char *Dev,int nZJPD)
+{
+	tagFrameData Data;
+	Data.dwFrameDataLen = m_parse.SendToBd_XTZJ(0, nZJPD, Data.pFrameData);
+
+	CComUnit *comDevPt = NULL;
+	if (g_pComManager->GetComDev(&comDevPt, Dev) != TRUE)
+	{
+		return FALSE;
+	}
+	if (comDevPt->SetSendMsg(Data) != TRUE)
+	{
+		return FALSE;
+	}
+	comDevPt->ProcessSendMsg();
+	return TRUE;
 }
