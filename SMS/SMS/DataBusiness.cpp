@@ -1,4 +1,5 @@
 #include "DataBusiness.h"
+#include "IniOper.h"
 
 //互斥锁
 pthread_mutex_t g_busiessData_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -7,9 +8,11 @@ extern CUnitsManager *g_pComManager;
 void *threadBusiess(void *arg);
 //extern CDataTransfer *g_pDatatransfer = NULL;
 CDataBusiness * g_pDataBusiness = NULL;
+
 int NotifFun(char * sendName, void *pReq)
 {
 	g_pDataBusiness->SetBusiessData((CommReq *)pReq);
+	return 1;
 }
 
 CDataBusiness::CDataBusiness()
@@ -17,7 +20,26 @@ CDataBusiness::CDataBusiness()
 	g_pDataBusiness = this;
 	pthread_create(&m_DataBusinessPt, NULL, threadBusiess, this);
 
-	m_treansfer.StartZmq(10001, 20001, NotifFun);
+	//获得通信端口参数
+	char cPath[1000];
+	bzero(cPath, sizeof(cPath));
+
+	CIniOper ini;
+
+	if (ini.GetSoftPath(cPath, sizeof(cPath)) != 0)
+	{
+		exit(0);
+	}
+	strcat(cPath, "ini.lua");
+	int nRequestPort;
+	int nRespondPort;
+	if (ini.load(cPath, &nRequestPort, &nRespondPort) != 0)
+	{
+		exit(0);
+	}
+	
+	//开启中转通信服务
+	m_treansfer.StartZmq(nRequestPort, nRespondPort, NotifFun);
 }
 
 
@@ -110,6 +132,7 @@ int CDataBusiness::SetBusiessData(CommReq *pCommReq)
 
 	//解析存入控制模块
 	g_pComManager->SetSendMsg(*pCommReq);
+	delete pCommReq;
 	return 0;
 }
 

@@ -60,7 +60,7 @@ int CAlarmClock::Start(Remind remindFun)
 void *threadProcess(void *arg)
 {
 	pthread_detach(pthread_self());
-	printf("ProcessTimerThreadID: %ld\n", pthread_self());
+	//printf("ProcessTimerThreadID: %ld\n", pthread_self());
 
 	int state, oldstate;
 

@@ -15,7 +15,7 @@ public:
 	CDataTransfer();
 	~CDataTransfer();
 	// 开启服务
-	int StartZmq(int nRequest, int nRespondPort, zmqNotif notifFun);
+	int StartZmq(int nRequestPort, int nRespondPort, zmqNotif notifFun);
 	// 关闭服务
 	int CloseZmq();
 

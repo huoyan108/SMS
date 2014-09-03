@@ -17,7 +17,7 @@ CDataTransfer::~CDataTransfer()
 
 
 // 初始化ZMQ
-int CDataTransfer::StartZmq(int nRequest, int nRespondPort, zmqNotif notifFun)
+int CDataTransfer::StartZmq(int nRequestPort, int nRespondPort, zmqNotif notifFun)
 {
 	char addr[100] = { 0 };
 	bzero(addr, sizeof(addr));
@@ -27,7 +27,7 @@ int CDataTransfer::StartZmq(int nRequest, int nRespondPort, zmqNotif notifFun)
 
 	//接收
 	m_pRequester = zmq_socket(m_context, ZMQ_PULL);
-	sprintf(addr, "tcp://*:%d", nRequest);
+	sprintf(addr, "tcp://*:%d", nRequestPort);
 	zmq_bind(m_pRequester, addr);
 
 	//发送

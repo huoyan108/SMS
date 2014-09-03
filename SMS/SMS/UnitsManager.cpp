@@ -156,6 +156,8 @@ int CUnitsManager::AddComDev(char *Dev,
 
 	m_devMap[Dev] = comDevPt;
 	m_AlarmClock.AddATimer(Dev, 10);
+
+	printf("Add Dev %s Success\n", Dev);
 	return TRUE;
 }
 
@@ -176,6 +178,8 @@ int CUnitsManager::DelComDev(char *Dev)
 		delete comDevPt;
 		m_devMap.erase(it);
 	}
+	printf("Del Dev %s Success\n", Dev);
+
 	return TRUE;
 }
 
@@ -195,6 +199,8 @@ int CUnitsManager::ModifComDev(char *Dev,
 	{
 		return FALSE;
 	}
+	printf("modif Dev %s Success\n", Dev);
+
 	return TRUE;
 }
 

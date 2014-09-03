@@ -12,7 +12,7 @@ SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 PROJECT (SMS)
 
 #build files
-SET(SRC_LIST   test3.cpp ComDev.cpp ComUnit.cpp PareData.cpp UnitsManager.cpp AlarmClock.cpp DataTransfer.cpp DataBusiness.cpp)
+SET(SRC_LIST test3.cpp IniOper.cpp ComDev.cpp ComUnit.cpp PareData.cpp UnitsManager.cpp AlarmClock.cpp DataTransfer.cpp DataBusiness.cpp)
 
 #zhi ding yuan wen jian mu lu 
 #aux_source_directory(. SRC_LIST)
@@ -20,6 +20,7 @@ SET(SRC_LIST   test3.cpp ComDev.cpp ComUnit.cpp PareData.cpp UnitsManager.cpp Al
 #lib include path
 LINK_LIBRARIES(/usr/local/lib/)
 INCLUDE_DIRECTORIES(/usr/local/include/)
+LINK_DIRECTORIES(/usr/local)
 
 #mu biao zhi xing lie biao 
 ADD_EXECUTABLE(sms ${SRC_LIST})
@@ -31,9 +32,9 @@ ADD_EXECUTABLE(sms ${SRC_LIST})
 TARGET_LINK_LIBRARIES(sms pthread)
 
 #lua
-#TARGET_LINK_LIBRARIES(epolltest m)
-#TARGET_LINK_LIBRARIES(epolltest lua)
-#TARGET_LINK_LIBRARIES(epolltest dl)
+TARGET_LINK_LIBRARIES(sms m)
+TARGET_LINK_LIBRARIES(sms lua)
+TARGET_LINK_LIBRARIES(sms dl)
 
 #zmq
 TARGET_LINK_LIBRARIES(sms zmq)

@@ -48,6 +48,9 @@
     <ClInclude Include="DataTransfer.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="IniOper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ComDev.cpp">
@@ -86,8 +89,14 @@
     <ClCompile Include="test3.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="IniOper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="bulid\ini.lua" />
   </ItemGroup>
 </Project>
