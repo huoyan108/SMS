@@ -6,6 +6,7 @@
 #include "AlarmClock.h"
 #include "PareData.h"
 using namespace std;
+#include "./proto/smsTx.pb.h"
 
 class CUnitsManager
 {
@@ -35,10 +36,11 @@ public:
 		int nStop);
 
 	//设置发送信息
-	int SetSendMsg(CommReq &Data);
+	int SetSendMsg(BdfsMsg *pData);
 
 	// 控制设备发送
 	int ControlDevSend(char *Dev/*, char *buff, int size*/);
+	int ControlDevSend(unsigned long nLocalId);
 
 	//接收设备数据
 	friend int  RecvDevData(char *DevID, char *buff, int  len);
@@ -57,13 +59,15 @@ protected:
 	CPareData m_parse;
 
 	//数据发送列表
-	list<CommReq> m_dataList;
+	list<BdfsMsg> m_dataList;
 
 	// 向设备单元添加发送信息,如果pData为空，从列表获取
-	int SetDevSendMsg(char *DevID, CommReq *pData = NULL);
+	//int SetDevSendMsg(char *DevID, BdfsMsg *pData = NULL);
+	int SetDevSendMsg(unsigned long nLocalId, BdfsMsg *pData = NULL);
 
 	// 获取设备
-	int GetComDev(CComUnit** comDevPt, char *Dev);
+	int GetComDevFromDevId(CComUnit** comDevPt, char *Dev);
+	int GetComDevFromLocalId(CComUnit** comDevPt, unsigned long nLocalId);
 
 public:
 	// IC卡自检

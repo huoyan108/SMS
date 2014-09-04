@@ -8,28 +8,31 @@
 #include <string.h>
 #include "CNDef.h"
 #include <stdio.h>
+#include "./proto/smsTx.pb.h"
 
 class CPareData
 {
 public:
 	CPareData();
 	~CPareData();
+	DWORD SendToBd_TXSQ(BdfsMsg& stReq, char* pSendBuffer,DWORD &nBufferlength);
+	char ExplainData_BD(char* pSrcBuffer, DWORD dwBufferLen, char* pDestBuffer);
+	DWORD SendToBd_ICJC(DWORD dwLocalID, char nFramNo, char* pSendBuffer);
+	DWORD SendToBd_XTZJ(DWORD dwLocalID, unsigned short nSelfFre, char* pSendBuffer);
 
-	char ExplainData_BD(char* pSrcBuffer, unsigned long dwBufferLen, char* pDestBuffer);
-	char ExplainData_UDP(char* pSrcBuffer, char* pDestBuffer, unsigned long& dwExplainLen);
-	char ExplainData_TCP(char* pSrcBuffer, unsigned long dwBufferLen, char* pDestBuffer);
 
-	unsigned long SendToDS_XTJC(unsigned long dwIndex, char* pSendBuffer);
-	unsigned long SendToDS_DWXX(tagPosInfo& stPosInfo, char* pSendBuffer);
-	unsigned long SendToDS_TXXX(tagCommInfo& stCommInfo, char* pSendBuffer);
-	unsigned long SendToDS_TXHZ(tagSendBackInfo& stSendBack, unsigned long dwSerialID, char* pSendBuffer);
-	unsigned long SendToDS_ZJXX(unsigned long dwMachineID, char nStatus, char* pSendBuffer);
-	unsigned long SendToDS_FKXX(unsigned long dwLocalID, unsigned long dwDestID, unsigned long dwSerialID, char nFeedResult, char* pSendBuffer);
+	char ExplainData_UDP(char* pSrcBuffer, char* pDestBuffer, DWORD& dwExplainLen);
+	char ExplainData_TCP(char* pSrcBuffer, DWORD dwBufferLen, char* pDestBuffer);
 
-	unsigned long SendToBd_ICJC(unsigned long dwLocalID, char nFramNo, char* pSendBuffer);
-	unsigned long SendToBd_XTZJ(unsigned long dwLocalID, unsigned short nSelfFre, char* pSendBuffer);
-	unsigned long SendToBd_TXSQ(tagCommReq& stReq, char* pSendBuffer);
+	DWORD SendToDS_XTJC(DWORD dwIndex, char* pSendBuffer);
+	DWORD SendToDS_DWXX(tagPosInfo& stPosInfo, char* pSendBuffer);
+	DWORD SendToDS_TXXX(tagCommInfo& stCommInfo, char* pSendBuffer);
+	DWORD SendToDS_TXHZ(tagSendBackInfo& stSendBack, DWORD dwSerialID, char* pSendBuffer);
+	DWORD SendToDS_ZJXX(DWORD dwMachineID, char nStatus, char* pSendBuffer);
+	DWORD SendToDS_FKXX(DWORD dwLocalID, DWORD dwDestID, DWORD dwSerialID, char nFeedResult, char* pSendBuffer);
+
+	DWORD SendToBd_TXSQ(tagCommReq& stReq, char* pSendBuffer);
 protected:
-	char ComputeCheckSum(char * Buff, unsigned long Len);
+	char ComputeCheckSum(char * Buff, DWORD Len);
 };
 

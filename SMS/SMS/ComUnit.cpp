@@ -21,19 +21,19 @@ int  RecvDevData(void *object,char *DevID, char *buff, int  len)
 			FeedbackInfo stBackInfo;
 			stBackInfo = *(FeedbackInfo*)pEncodeData;
 
-			unsigned long dwLocalID;
-			unsigned long dwDestID;
-			unsigned long dwSerialID;
+			DWORD dwLocalID;
+			DWORD dwDestID;
+			DWORD dwSerialID;
 			//string strMsg;
 
 			char pSendBuffer[30];
-			unsigned long dwSendDataLen;
+			DWORD dwSendDataLen;
 			//打包发送反馈信息
 			me->SetTXRes(stBackInfo);
 			me->m_myFun(FEEDBACK_FKXX, &stBackInfo);
 			//如果成功删除本地发送列表(待确定,目前确认发送就删除)
 			//失败等待下次发送(待确定)
-			map<unsigned long, tagFrameData &>::iterator it = me->m_sendMsgList.begin();
+			map<DWORD, tagFrameData &>::iterator it = me->m_sendMsgList.begin();
 			if (it != me->m_sendMsgList.end())
 			{
 				me->m_sendMsgList.erase(it);
@@ -45,7 +45,7 @@ int  RecvDevData(void *object,char *DevID, char *buff, int  len)
 		{
 			CardInfoRead stCardInfo;
 			stCardInfo = *(CardInfoRead*)pEncodeData;
-
+			me->m_nLocalID = stCardInfo.LocalID;
 			me->SetIcCardMsg(stCardInfo);
 		}
 		break;
@@ -65,7 +65,8 @@ int  RecvDevData(void *object,char *DevID, char *buff, int  len)
 }
 
 CComUnit::CComUnit() :m_nSendSeq(0),
-m_myFun(0)
+m_myFun(0),
+m_nLocalID(0)
 {
 
 }
@@ -143,7 +144,7 @@ int CComUnit::ProcessSendMsg()
 	int nRes = 0;
 	if (m_sendMsgList.begin() != m_sendMsgList.end())
 	{
-		map<unsigned long, tagFrameData &>::iterator it = m_sendMsgList.begin();
+		map<DWORD, tagFrameData &>::iterator it = m_sendMsgList.begin();
 		nRes = m_comDev.SendData((*it).second.pFrameData, (*it).second.dwFrameDataLen);
 		//推送到设备成功
 		if (nRes == TRUE)
@@ -174,7 +175,11 @@ int CComUnit::ProcessSendMsg()
 int CComUnit::GetSendMsgReq()
 {
 	//反馈信息
-	m_myFun(FEEDBACK_SJREQ, m_cDev);
+	if (m_nLocalID != 0)
+	{
+		m_myFun(FEEDBACK_SJREQ, &m_nLocalID);
+
+	}
 
 	return 0;
 }
@@ -192,7 +197,7 @@ int CComUnit::SetSendMsg(tagFrameData &Data)
 		m_nSendSeq = 0;
 	}
 	//m_sendMsgList[m_nSendSeq] = Data;
-	//map<unsigned long, tagFrameData &>::value_type(m_nSendSeq, Data);
-	m_sendMsgList.insert(map<unsigned long, tagFrameData &>::value_type(m_nSendSeq, Data));
+	//map<DWORD, tagFrameData &>::value_type(m_nSendSeq, Data);
+	m_sendMsgList.insert(map<DWORD, tagFrameData &>::value_type(m_nSendSeq, Data));
 	return TRUE;
 }

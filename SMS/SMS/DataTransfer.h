@@ -14,6 +14,10 @@ class CDataTransfer
 public:
 	CDataTransfer();
 	~CDataTransfer();
+	char m_sSendSource[FSF_LEGHTH];		//发送方(软件名称)
+	int m_nRecvLength;
+	char m_nRecvBuff[PROCESS_FRAME_DATA_LENGTH];
+
 	// 开启服务
 	int StartZmq(int nRequestPort, int nRespondPort, zmqNotif notifFun);
 	// 关闭服务
@@ -23,7 +27,7 @@ public:
 	int RecvData();
 
 	// 发送数据
-	int SendData(char *buff, unsigned long length);
+	int SendData(char *buff, DWORD length);
 
 	zmqNotif m_notifFun;
 protected:

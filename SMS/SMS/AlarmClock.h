@@ -5,6 +5,7 @@
 //#include   <system.h>
 #include <pthread.h>
 using namespace std;
+#define DWORD unsigned long
 
 #define FALSE -1
 #define TRUE 0
@@ -12,8 +13,8 @@ typedef int(*Remind) (char *pId);
 struct ALARMTAG
 {
 	int nTimeoOutFlag;
-	unsigned long nDefTime;
-	unsigned long nLastTime;
+	DWORD nDefTime;
+	DWORD nLastTime;
 };
 class CAlarmClock
 {
@@ -21,7 +22,7 @@ public:
 	CAlarmClock();
 	~CAlarmClock();
 	// 添加一个定时器
-	int AddATimer(char *pId,unsigned long nTime);
+	int AddATimer(char *pId,DWORD nTime);
 	// 删除一个定时器
 	int DelATimer(char *pId);
 	// 开启闹钟

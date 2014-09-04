@@ -5,6 +5,7 @@
 using namespace std;
 #include "PareData.h"
 #include "DataTransfer.h"
+#include "./proto/smsTx.pb.h"
 class CDataBusiness
 {
 public:
@@ -24,13 +25,13 @@ protected:
 	CDataTransfer m_treansfer;
 
 	// 设置业务数据
-	int SetBusiessData(CommReq *pCommReq);
+	int SetBusiessData(BdfsMsg *pCommReq);
 
 	//解析打包
 	CPareData parseData;
 
 	//数据处理列表
-	list<CommReq *> m_dataList;
+	//list<CommReq *> m_dataList;
 	//通信反馈列表
 	list<FeedbackInfo> m_ResdataList;
 

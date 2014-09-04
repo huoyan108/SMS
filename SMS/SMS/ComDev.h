@@ -4,6 +4,7 @@
 日期	20140822
 说明	底层串口通信类，负责控制串口发送接收，使用select监听事件。
 */
+
 #include     <stdio.h>      /*标准输入输出定义*/
 #include     <stdlib.h>     /*标准函数库定义*/
 #include     <unistd.h>     /*Unix 标准函数定义*/

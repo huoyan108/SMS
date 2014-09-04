@@ -11,7 +11,7 @@ CDataBusiness * g_pDataBusiness = NULL;
 
 int NotifFun(char * sendName, void *pReq)
 {
-	g_pDataBusiness->SetBusiessData((CommReq *)pReq);
+	g_pDataBusiness->SetBusiessData((BdfsMsg *)pReq);
 	return 1;
 }
 
@@ -81,7 +81,7 @@ int CDataBusiness::ProcessBusiess()
 	//pthread_mutex_unlock(&g_busiessData_mutex);
 
 	//char pExplainData[1000];
-	//unsigned long dwExplLen;
+	//DWORD dwExplLen;
 
 	//while (!dataList.empty())
 	//{
@@ -111,7 +111,7 @@ int CDataBusiness::ProcessBusiess()
 
 	char cSendBuff[1024];
 	bzero(cSendBuff, sizeof(cSendBuff));
-	unsigned long nSendLength;
+	DWORD nSendLength;
 	while (!resdataList.empty())
 	{
 		printf("send Feedback\n");
@@ -123,7 +123,7 @@ int CDataBusiness::ProcessBusiess()
 	return TRUE;
 }
 // 设置业务数据
-int CDataBusiness::SetBusiessData(CommReq *pCommReq)
+int CDataBusiness::SetBusiessData(BdfsMsg *pCommReq)
 {
 	//pthread_mutex_lock(&g_busiessData_mutex);
 	//m_dataList.push_back(pCommReq);
@@ -131,8 +131,10 @@ int CDataBusiness::SetBusiessData(CommReq *pCommReq)
 	//存入数据库(待加)
 
 	//解析存入控制模块
-	g_pComManager->SetSendMsg(*pCommReq);
-	delete pCommReq;
+	g_pComManager->SetSendMsg(pCommReq);
+
+	//设置反馈，已收到BDFS请求
+
 	return 0;
 }
 

@@ -1,6 +1,17 @@
 #ifndef _MSGSTRUCTINFO_H_
 #define _MSGSTRUCTINFO_H_
+#define DWORD unsigned long
+#define BYTE unsigned char
 
+/*要用到的
+*/
+#define PROCESS_FRAME_DATA_LENGTH  1024 //数据处理帧长度
+
+#define FSF_LEGHTH 100  //发送方占位长度
+
+#define SJCD_LEGHT 2 //数据长度占位长度
+/*要用到的
+*/
 struct _SEND_DATA_TAG
 {
 	unsigned int nSeq;
@@ -13,11 +24,7 @@ struct _SEND_DATA_TAG
 
 #define LIST_COUNT_WAIT_FOR_SEND  20  //队列中存放的数据
 
-#define PROCESS_FRAME_DATA_LENGTH  1024*7 //数据处理帧长度
 
-#define FSF_LEGHTH 100  //发送方占位长度
-
-#define SJCD_LEGHT 2 //数据长度占位长度
 enum DATA_FROM_TYPE
 {
 	DATA_FROM_TCP = 1, //TCP连接发送的数据
@@ -63,15 +70,40 @@ enum
 	MACHINE_STATUS_MASK //屏蔽状态
 };
 
+
+//通信请求/北斗发送（中转到发送）
+typedef struct tagBdReq
+{
+	DWORD dwSerialID; //发送序号
+	DWORD SourceAddress;		//发送方地址  发送方为0，接收方有地址则任意指挥机发送
+	DWORD DestAddress;			//接收方地址	接收方为0，发送方有地址则通播
+	int  ifBCD;							//0:汉字    1:代码 2：混发
+	DWORD InfoLen;			//数据长度(单位：Bit)  不能传字节数，因为BCD可能不是整字节
+	char  InfoBuff[211];	//汉字:Max 120个  BCD:Max 420
+
+	//DWORD LocalID;
+
+	////报文通信
+	//int  ifSecret;			//固定填零
+	//int  ifQuick;			//00:普通   01:特快[注：和协议规定相反]
+	//int  ifCmd;			//[标准协议2.1版无此项] 口令识别[0:通信  1:口令识别]
+	//int  ifAnswer;			//[标准协议2.1版无此项] 是否应答
+
+
+	//DWORD dwTerminalID; //终端号
+	//char nSended; //是否发送
+
+}BdReq, *lpBdReq;
+
 /************************************************************************/
 //指挥机到分离                                                     
 /************************************************************************/
 typedef struct tagCardInfoRead
 {
-	unsigned long LocalID;
+	DWORD LocalID;
 	char FrameNum;				//帪号
 	//第0帧数据用到的变量
-	unsigned long BroadcastID;			//通播ID
+	DWORD BroadcastID;			//通播ID
 	char MachineCharacter;		//用户机特征
 	unsigned short ServeFreq;			//服务频度
 	unsigned short CommLen;
@@ -80,13 +112,13 @@ typedef struct tagCardInfoRead
 	unsigned short SubordinateNum;		//下级用户总数
 	//第N帧数据用到的变量
 	char CurrFrameSubNum;		//本帧下属用户数
-	unsigned long lpSubUserAddrs[100];	//指向下级用户地址的指针
+	DWORD lpSubUserAddrs[100];	//指向下级用户地址的指针
 } CardInfoRead, *lpCardInfoRead;
 
 //自检信息
 typedef struct tagSelfCheckInfo
 {
-	unsigned long LocalID;
+	DWORD LocalID;
 	char ICCardState;		// IC卡状态
 	char HardState;		// 硬件状态
 	char Batterystate;		// 电池电量
@@ -97,7 +129,7 @@ typedef struct tagSelfCheckInfo
 //反馈信息
 typedef struct tagFeedbackInfo
 {
-	unsigned long LocalID;
+	DWORD LocalID;
 	char FeedResult; //反馈结果
 	char Reserve[10];   // 保留
 }FeedbackInfo, *lpFeedbackInfo;
@@ -108,8 +140,8 @@ typedef struct tagFeedbackInfo
 //通信回执
 typedef struct tagSendBackInfo
 {
-	unsigned long dwSendID;
-	unsigned long dwRecvID;
+	DWORD dwSendID;
+	DWORD dwRecvID;
 	char nHour;
 	char nMinute;
 	char nSecond;
@@ -122,7 +154,7 @@ typedef struct  tagPosInfo
 	char  Precision;	//0:一档(20m)  1:二档(100m)
 	char  ifUrgent;		//0:否  1:紧急
 	char  ifMultiValue;	//0:多值解  1:无
-	unsigned long LocalID;	//指挥型用户所查询用户的用户地址
+	DWORD LocalID;	//指挥型用户所查询用户的用户地址
 
 	char pSecrets[6]; //密钥
 
@@ -140,24 +172,24 @@ typedef struct  tagPosInfo
 	char  LatDecsec;	//0.1秒
 
 	char nAltSign; //高程符号,0正，1,负
-	unsigned long Altitude;	//高程
+	DWORD Altitude;	//高程
 	char nEfSign; //高程异常符号
-	unsigned long Ef;		//高程异常
+	DWORD Ef;		//高程异常
 }PosInfo, *lpPosInfo;
 
 //通信信息（从中转接收到）
 typedef struct tagCommInfo
 {
-	unsigned long LocalID;	//本机ID(接收方ID，含子用户)
+	DWORD LocalID;	//本机ID(接收方ID，含子用户)
 	char  ifBCD;	//0:汉字  1:代码 
 	char  ifUrgent; //0:特快  1：普通
 	int  ifSecret;	//0:无密钥 1:有密钥
-	unsigned long SrcAddress;	//发信方地址
+	DWORD SrcAddress;	//发信方地址
 	char  CommHour;	//
 	char  CommMin;	//
 	char CommSecond; //
 	unsigned short CommLenByte;
-	unsigned long CommLenBit;	//电文长度(单位：bit)  不能传字节数，因为BCD可能不是整字节
+	DWORD CommLenBit;	//电文长度(单位：bit)  不能传字节数，因为BCD可能不是整字节
 	char  CommBuff[211];
 	int  CRCFlag;	//00:CRC校验正确 01:CRC校验错误
 }CommInfo, *lpCommInfo;
@@ -168,11 +200,11 @@ typedef struct tagCommInfo
 //通信请求
 typedef struct tagCommReq
 {
-	unsigned long LocalID;
-	unsigned long SourceAddress;		//接收方地址
+	DWORD LocalID;
+	DWORD SourceAddress;		//接收方地址
 
-	unsigned long DestAddress;		//接收方地址
-	unsigned long InfoLen;			//数据长度(单位：Bit)  不能传字节数，因为BCD可能不是整字节
+	DWORD DestAddress;		//接收方地址
+	DWORD InfoLen;			//数据长度(单位：Bit)  不能传字节数，因为BCD可能不是整字节
 	char  InfoBuff[211];	//汉字:Max 120个  BCD:Max 420
 	//报文通信
 	int  ifSecret;			//固定填零
@@ -182,15 +214,15 @@ typedef struct tagCommReq
 	int  ifAnswer;			//[标准协议2.1版无此项] 是否应答
 
 	//
-	unsigned long dwSerialID; //通信流水号
-	unsigned long dwTerminalID; //终端号
+	DWORD dwSerialID; //通信流水号
+	DWORD dwTerminalID; //终端号
 	//
 	char nSended; //是否发送
 }CommReq, *lpCommReq;
 
 typedef struct tagClientCheck
 {
-	unsigned long dwAnswerIndex;
+	DWORD dwAnswerIndex;
 }ClientCheck,*lpClientCheck;
 
 /************************************************************************/
@@ -208,26 +240,26 @@ typedef struct tagSendDataInfo
 	char nSended;
 	char nRecved;
 
-	unsigned long dwIndexInTable; //表中的索引
+	DWORD dwIndexInTable; //表中的索引
 }SendDataInfo, *lpSendDataInfo;
 
 //系统初始化结构体
 typedef struct tagSysInial
 {
-	unsigned long dwListenPort_TCP;
-	unsigned long dwListenPort_UDP;
+	DWORD dwListenPort_TCP;
+	DWORD dwListenPort_UDP;
 	char pServerName[50];
 	char pDbName[50];
 	char pUserName[50];
 
-	unsigned long dwListCount; //用户机队列最大个数
+	DWORD dwListCount; //用户机队列最大个数
 }SysInial;
 
 //数据处理结构体
 struct tagFrameData
 {
 	char pFrameData[PROCESS_FRAME_DATA_LENGTH];
-	unsigned long dwFrameDataLen; //数据长度
+	DWORD dwFrameDataLen; //数据长度
 	DATA_FROM_TYPE eFromType; //数据来源
 	char nComID; //串口号
 	char cDev[20];

@@ -2,6 +2,7 @@
 
 //互斥锁
 pthread_mutex_t g_unitsSendData_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t g_units_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 CUnitsManager *g_pComManager = NULL;
 int  RemindFun(char *pId)
@@ -31,17 +32,17 @@ int  FeedBackFun(int nStyle, void *object)
 		{
 			printf("SJREQ\n");
 
-			g_pComManager->SetDevSendMsg((char *)object);
-			g_pComManager->ControlDevSend((char *)object);
+			g_pComManager->SetDevSendMsg((int)*object);
+			g_pComManager->ControlDevSend((int)*object);
 						
 		}
 		break;
 		case FEEDBACK_ICXX:	//IC信息
 		{
-			//unsigned long LocalID;
+			//DWORD LocalID;
 			//char FrameNum;				//帪号
 			////第0帧数据用到的变量
-			//unsigned long BroadcastID;			//通播ID
+			//DWORD BroadcastID;			//通播ID
 			//char MachineCharacter;		//用户机特征
 			//unsigned short ServeFreq;			//服务频度
 			//unsigned short CommLen;
@@ -50,7 +51,7 @@ int  FeedBackFun(int nStyle, void *object)
 			//unsigned short SubordinateNum;		//下级用户总数
 			////第N帧数据用到的变量
 			//char CurrFrameSubNum;		//本帧下属用户数
-			//unsigned long lpSubUserAddrs[100];	//指向下级用户地址的指针
+			//DWORD lpSubUserAddrs[100];	//指向下级用户地址的指针
 			CardInfoRead *pIcInfo = (CardInfoRead *)object;
 			//ShowMachineMsg(m_nComID, m_stCardInfo.LocalID, m_stCardInfo.ServeFreq, m_dwCommReqLen, m_nBroadCastID);
 			printf("LocalID:%ld  ServeFreq:%ld\n", pIcInfo->LocalID, pIcInfo->ServeFreq);
@@ -58,7 +59,7 @@ int  FeedBackFun(int nStyle, void *object)
 			break;
 		case FEEDBACK_ZJXX:	//自检信息
 		{
-			//unsigned long LocalID;
+			//DWORD LocalID;
 			//char ICCardState;		// IC卡状态
 			//char HardState;		// 硬件状态
 			//char Batterystate;		// 电池电量
@@ -153,9 +154,16 @@ int CUnitsManager::AddComDev(char *Dev,
 	{
 		return FALSE;
 	}
+	//自检
+	SendICJC(Dev);
+	SendXTZJ(Dev,5);
+
+	pthread_mutex_lock(&g_unitsSendData_mutex);
 
 	m_devMap[Dev] = comDevPt;
 	m_AlarmClock.AddATimer(Dev, 10);
+
+	pthread_mutex_unlock(&g_unitsSendData_mutex);
 
 	printf("Add Dev %s Success\n", Dev);
 	return TRUE;
@@ -165,6 +173,8 @@ int CUnitsManager::AddComDev(char *Dev,
 // 删除设备
 int CUnitsManager::DelComDev(char *Dev)
 {
+	pthread_mutex_lock(&g_unitsSendData_mutex);
+
 	map<string, CComUnit*>::iterator it = m_devMap.find(Dev);
 	if (it != m_devMap.end())
 	{
@@ -178,6 +188,8 @@ int CUnitsManager::DelComDev(char *Dev)
 		delete comDevPt;
 		m_devMap.erase(it);
 	}
+	pthread_mutex_unlock(&g_unitsSendData_mutex);
+
 	printf("Del Dev %s Success\n", Dev);
 
 	return TRUE;
@@ -208,6 +220,9 @@ int CUnitsManager::ModifComDev(char *Dev,
 // 控制设备发送
 int CUnitsManager::ControlDevSend(char *Dev/*, char *buff, int size*/)
 {
+
+	pthread_mutex_lock(&g_unitsSendData_mutex);
+
 	map<string, CComUnit*>::iterator it = m_devMap.find(Dev);
 	if (it != m_devMap.end())
 	{
@@ -219,37 +234,48 @@ int CUnitsManager::ControlDevSend(char *Dev/*, char *buff, int size*/)
 		//comDevPt->SetSendMsg(Data);
 		comDevPt->ProcessSendMsg();
 	}
+	pthread_mutex_unlock(&g_unitsSendData_mutex);
+
 	return 0;
 }
 
-
-// 向设备添加发送信息
-int CUnitsManager::SetDevSendMsg(char *DevID, CommReq *pData)
+int CUnitsManager::ControlDevSend(unsigned long nLocalId)
 {
+
 	CComUnit *comDevPt = NULL;
-	if (g_pComManager->GetComDev(&comDevPt, DevID) != TRUE)
+	if (g_pComManager->GetComDevFromLocalId(&comDevPt, nLocalId) != TRUE)
 	{
 		return FALSE;
 	}
-	tagFrameData FrameData;
-	memcpy(FrameData.pFrameData, pData->InfoBuff, pData->InfoLen);
-	FrameData.dwFrameDataLen = pData->InfoLen;
-	if (pData != NULL)
+	comDevPt->ProcessSendMsg();
+
+	return 0;
+}
+// 向设备添加发送信息
+int CUnitsManager::SetDevSendMsg(unsigned long nLocalId, BdfsMsg *pData)
+{
+	CComUnit *comDevPt = NULL;
+	if (g_pComManager->GetComDevFromLocalId(&comDevPt, nLocalId) != TRUE)
 	{
-		if (comDevPt->SetSendMsg(FrameData) != TRUE)
-		{
-			return FALSE;
-		}
-		return TRUE;
+		return FALSE;
 	}
-	pthread_mutex_lock(&g_unitsSendData_mutex);
 
-	CommReq Data = m_dataList.front();
-	m_dataList.pop_front();
-	pthread_mutex_unlock(&g_unitsSendData_mutex);
+	BdfsMsg DataTemp;
+	if (pData == NULL)
+	{
+		pthread_mutex_lock(&g_unitsSendData_mutex);
 
-	memcpy(FrameData.pFrameData, Data.InfoBuff, Data.InfoLen);
-	FrameData.dwFrameDataLen = Data.InfoLen;
+		DataTemp = m_dataList.front();
+		m_dataList.pop_front();
+		pthread_mutex_unlock(&g_unitsSendData_mutex);
+	}
+	else
+	{
+		memcpy(&DataTemp, pData, sizeof(DataTemp));
+	}
+	//北斗发送打包
+	tagFrameData FrameData;
+	m_parse.SendToBd_TXSQ(DataTemp, FrameData.pFrameData, Data.dwFrameDataLen)
 
 	if (comDevPt->SetSendMsg(FrameData) != TRUE)
 	{
@@ -259,24 +285,30 @@ int CUnitsManager::SetDevSendMsg(char *DevID, CommReq *pData)
 }
 
 //设置发送信息
-int CUnitsManager::SetSendMsg(CommReq &Data)
+int CUnitsManager::SetSendMsg(BdfsMsg *pData)
 {
-	//打包发送请求数据
 
 	pthread_mutex_lock(&g_unitsSendData_mutex);
 
-	//制定的直接放进设备,否则先存在列表
-	//if (Data.SourceAddress <= 0)
-	//{
-	//	if (SetDevSendMsg(Data.cDev, &Data) != TRUE)
-	//	{
-	//		m_dataList.push_back(Data);
-	//	}
-
-	//}
-	//else
+	//指定指挥机的通播
+	if (pData->ndestaddress == 0 && pData->nsourceaddress != 0)
 	{
-		m_dataList.push_back(Data);
+		//指定设备加载数据
+		if (SetDevSendMsg(pData->nsourceaddress, pData) != TRUE)
+		{
+			m_dataList.push_back(*pData);
+		}
+
+	}
+	//任意指挥机发送
+	else if (pData->ndestaddress != 0)
+	{
+		m_dataList.push_back(*pData);
+
+	}
+	else 
+	{
+		printf("BDSF Msg Error\n");
 	}
 
 	pthread_mutex_unlock(&g_unitsSendData_mutex);
@@ -284,14 +316,41 @@ int CUnitsManager::SetSendMsg(CommReq &Data)
 	return TRUE;
 }
 // 获取设备
-int CUnitsManager::GetComDev(CComUnit** comDevPt, char *Dev)
+int CUnitsManager::GetComDevFromDevId(CComUnit** comDevPt, char *Dev)
 {
+	pthread_mutex_lock(&g_unitsSendData_mutex);
+
 	map<string, CComUnit*>::iterator it = m_devMap.find(Dev);
 	if (it != m_devMap.end())
 	{
 		*comDevPt = it->second;
+		pthread_mutex_unlock(&g_unitsSendData_mutex);
+
 		return TRUE;
 	}
+	pthread_mutex_unlock(&g_unitsSendData_mutex);
+
+	return FALSE;
+}
+int CUnitsManager::GetComDevFromLocalId(CComUnit** comDevPt, unsigned long nLocalId)
+{
+	pthread_mutex_lock(&g_unitsSendData_mutex);
+
+	map<string, CComUnit*>::iterator it = m_devMap.begin;
+	while (it != m_devMap.end())
+	{
+		*comDevPt = it->second;
+		if ((*comDevPt)->m_nLocalID == nLocalId)
+		{
+			pthread_mutex_unlock(&g_unitsSendData_mutex);
+
+			return TRUE;
+		}
+		
+		it++;
+	}
+	pthread_mutex_unlock(&g_unitsSendData_mutex);
+
 	return FALSE;
 }
 
@@ -303,7 +362,7 @@ int CUnitsManager::SendICJC(char *Dev)
 	Data.dwFrameDataLen = m_parse.SendToBd_ICJC(0, 0, Data.pFrameData);
 
 	CComUnit *comDevPt = NULL;
-	if (g_pComManager->GetComDev(&comDevPt, Dev) != TRUE)
+	if (g_pComManager->GetComDevFromDevId(&comDevPt, Dev) != TRUE)
 	{
 		return FALSE;
 	}
@@ -325,7 +384,7 @@ int CUnitsManager::SendXTZJ(char *Dev,int nZJPD)
 	Data.dwFrameDataLen = m_parse.SendToBd_XTZJ(0, nZJPD, Data.pFrameData);
 
 	CComUnit *comDevPt = NULL;
-	if (g_pComManager->GetComDev(&comDevPt, Dev) != TRUE)
+	if (g_pComManager->GetComDevFromDevId(&comDevPt, Dev) != TRUE)
 	{
 		return FALSE;
 	}

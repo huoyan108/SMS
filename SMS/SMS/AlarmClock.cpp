@@ -15,7 +15,7 @@ CAlarmClock::~CAlarmClock()
 
 
 // 添加一个定时器
-int CAlarmClock::AddATimer(char *pId, unsigned long nTime)
+int CAlarmClock::AddATimer(char *pId, DWORD nTime)
 {
 	printf("AddATimer %s\n",pId);
 	ALARMTAG *pAlarmTag = new ALARMTAG();
@@ -103,8 +103,8 @@ int CAlarmClock::ProcessTime()
 	{
 		
 		it->second->nLastTime += 1;
-		unsigned long nLastTimeTemp = it->second->nLastTime;
-		unsigned long nDefTime = it->second->nDefTime;
+		DWORD nLastTimeTemp = it->second->nLastTime;
+		DWORD nDefTime = it->second->nDefTime;
 		
 		//if (it->second->nDefTime <= it->second->nLastTime)
 		if (nDefTime <= nLastTimeTemp)

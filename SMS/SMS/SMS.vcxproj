@@ -70,10 +70,10 @@
     <ClInclude Include="DataBusiness.h" />
     <ClInclude Include="DataTransfer.h" />
     <ClInclude Include="IniOper.h" />
+    <ClInclude Include="proto\smsTx.pb.h" />
     <ClInclude Include="UnitsManager.h" />
     <ClInclude Include="ComUnit.h" />
     <ClInclude Include="MsgStructInfo.h" />
-    <ClInclude Include="MyVector.h" />
     <ClInclude Include="PareData.h" />
     <ClInclude Include="PrintMsg.h" />
   </ItemGroup>
@@ -83,11 +83,11 @@
     <ClCompile Include="DataBusiness.cpp" />
     <ClCompile Include="DataTransfer.cpp" />
     <ClCompile Include="IniOper.cpp" />
+    <ClCompile Include="proto\smsTx.pb.cc" />
     <ClCompile Include="test2.cpp" />
     <ClCompile Include="test3.cpp" />
     <ClCompile Include="UnitsManager.cpp" />
     <ClCompile Include="ComUnit.cpp" />
-    <ClCompile Include="MyVector.cpp" />
     <ClCompile Include="PareData.cpp" />
     <ClCompile Include="PrintMsg.cpp" />
     <ClCompile Include="test.cpp" />
@@ -97,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="bulid\ini.lua" />
+    <None Include="proto\smsTx.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

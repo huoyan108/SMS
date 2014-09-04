@@ -32,6 +32,7 @@ public:
 	// 进行发送
 	int ProcessSendMsg();
 
+	unsigned long m_nLocalID;		//指挥机ID
 	CComUnit();
 	~CComUnit();
 
@@ -53,10 +54,10 @@ protected:
 	char m_cDev[20];
 
 	//发送列表
-	map<unsigned long, tagFrameData &> m_sendMsgList;
+	map<DWORD, tagFrameData &> m_sendMsgList;
 
 	//发送序号
-	unsigned long m_nSendSeq;
+	DWORD m_nSendSeq;
 
 	// 获取要发送的数据
 	int GetSendMsgReq();
@@ -70,7 +71,7 @@ protected:
 	int m_nMachineStatus; //用户机自检状态
 	//IC信息
 	CardInfoRead m_stCardInfo;
-	unsigned long m_dwCommReqLen; //通信长度
+	DWORD m_dwCommReqLen; //通信长度
 	int m_nBroadCastID; //通播号
 public:
 

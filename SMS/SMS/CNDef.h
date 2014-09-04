@@ -27,7 +27,7 @@
 
 static union{
 	char c[4];
-	unsigned long l;
+	DWORD l;
 }endian_test={{'l','?','?','b'}};
 #define ENDIANNESS ((char)endian_test.l)
 #define ISBIGENDIAN (ENDIANNESS=='b')

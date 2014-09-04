@@ -12,7 +12,7 @@ SET(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 PROJECT (SMS)
 
 #build files
-SET(SRC_LIST test3.cpp IniOper.cpp ComDev.cpp ComUnit.cpp PareData.cpp UnitsManager.cpp AlarmClock.cpp DataTransfer.cpp DataBusiness.cpp)
+SET(SRC_LIST test3.cpp IniOper.cpp ComDev.cpp ComUnit.cpp PareData.cpp UnitsManager.cpp AlarmClock.cpp DataTransfer.cpp DataBusiness.cpp ./proto/smsTx.pb.cc)
 
 #zhi ding yuan wen jian mu lu 
 #aux_source_directory(. SRC_LIST)
@@ -39,4 +39,5 @@ TARGET_LINK_LIBRARIES(sms dl)
 #zmq
 TARGET_LINK_LIBRARIES(sms zmq)
 
-
+#protoc
+TARGET_LINK_LIBRARIES(sms protobuf)

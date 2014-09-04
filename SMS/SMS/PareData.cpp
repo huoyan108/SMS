@@ -31,14 +31,80 @@ CPareData::CPareData()
 CPareData::~CPareData()
 {
 }
-unsigned long RoundMax(unsigned long Dividend, unsigned long Divisor)
+DWORD CPareData::SendToBd_TXSQ(BdfsMsg& stReq, char* pSendBuffer, DWORD &nBufferlength)
+{
+	memcpy(pSendBuffer, "$TXSQ", 5);
+
+	DWORD f_iCurLen;
+	DWORD f_dwTemp;
+
+	//本机地址
+	f_iCurLen = 7;
+	pSendBuffer[f_iCurLen] = LOBYTE(HIWORD(stReq.nsourceaddress));
+	f_iCurLen++;
+	pSendBuffer[f_iCurLen] = HIBYTE(LOWORD(stReq.nsourceaddress));
+	f_iCurLen++;
+	pSendBuffer[f_iCurLen] = LOBYTE(LOWORD(stReq.nsourceaddress));
+	f_iCurLen++;
+	//报文类别
+	pSendBuffer[f_iCurLen] = 0x40;
+	pSendBuffer[f_iCurLen] |=  0x00; //0
+	pSendBuffer[f_iCurLen] |= 0x00;
+	pSendBuffer[f_iCurLen] |= stReq.nmsgtype ? 0x02 : 0x00;
+	f_iCurLen++;
+	//目的地址
+	pSendBuffer[f_iCurLen] = LOBYTE(HIWORD(stReq.ndestaddress));
+	f_iCurLen++;
+	pSendBuffer[f_iCurLen] = HIBYTE(LOWORD(stReq.ndestaddress));
+	f_iCurLen++;
+	pSendBuffer[f_iCurLen] = LOBYTE(LOWORD(stReq.ndestaddress));
+	f_iCurLen++;
+	//报文长度
+	int nReportLen = stReq.ninfolen;
+	if (stReq.nmsgtype == 2)
+		nReportLen += 8;
+
+	sprintf(pSendBuffer + f_iCurLen, "%d", swab16(nReportLen));
+	f_iCurLen += 2;
+	//是否应答
+	pSendBuffer[f_iCurLen] = 0;
+	f_iCurLen++;
+	//报文内容
+	if (stReq.nmsgtype == 2) //混发
+	{
+		pSendBuffer[f_iCurLen] = 0xA4;
+		f_iCurLen++;
+
+		f_dwTemp = RoundMax(nReportLen, 8); //加入混发标志
+	}
+	else if (stReq.nmsgtype == 1 || stReq.nmsgtype == 0)
+	{
+		f_dwTemp = RoundMax(nReportLen, 8);
+	}
+
+
+	memcpy(pSendBuffer + f_iCurLen, stReq.sinfobuff, f_dwTemp);
+	f_iCurLen += f_dwTemp;
+
+	sprintf(pSendBuffer + f_iCurLen, "%d", swab16(f_iCurLen + 1));
+	f_iCurLen += 2;
+
+	pSendBuffer[f_iCurLen] = ComputeCheckSum(pSendBuffer, f_iCurLen);
+	f_iCurLen++;
+
+	nBufferlength = f_iCurLen;
+	return f_iCurLen;
+}
+
+DWORD RoundMax(DWORD Dividend, DWORD Divisor)
 {
 	if (Dividend % Divisor != 0)
 		return Dividend / Divisor + 1;
 	else
 		return Dividend / Divisor;
 }
-char CPareData::ExplainData_BD(char* pSrcBuffer, unsigned long dwBufferLen, char* pDestBuffer)
+
+char CPareData::ExplainData_BD(char* pSrcBuffer, DWORD dwBufferLen, char* pDestBuffer)
 {
 	char nReportID;
 	int i;
@@ -56,7 +122,7 @@ char CPareData::ExplainData_BD(char* pSrcBuffer, unsigned long dwBufferLen, char
 		return CUNPACK_NULL;
 
 	int  f_iCurLen;
-	unsigned long  f_dwTemp;//无符号
+	DWORD  f_dwTemp;//无符号
 
 	switch (nReportID)
 	{
@@ -212,8 +278,55 @@ char CPareData::ExplainData_BD(char* pSrcBuffer, unsigned long dwBufferLen, char
 
 }
 
+DWORD CPareData::SendToBd_ICJC(DWORD dwLocalID, char nFramNo, char* pSendBuffer)
+{
+	memcpy(pSendBuffer, "$ICJC", 5);
 
-char CPareData::ExplainData_TCP(char* pSrcBuffer, unsigned long dwBufferLen, char* pDestBuffer)
+	DWORD dwIndex = 7;
+	pSendBuffer[dwIndex] = LOBYTE(HIWORD(dwLocalID));
+	dwIndex++;
+	pSendBuffer[dwIndex] = HIBYTE(LOWORD(dwLocalID));
+	dwIndex++;
+	pSendBuffer[dwIndex] = LOBYTE(LOWORD(dwLocalID));
+	dwIndex++;
+	//帧号
+	pSendBuffer[dwIndex] = nFramNo;
+	dwIndex++;
+	//长度
+	sprintf(pSendBuffer + dwIndex, "%d", swab16(dwIndex + 1));
+	dwIndex += 2;
+	//校验
+	pSendBuffer[dwIndex] = ComputeCheckSum(pSendBuffer, dwIndex);
+	dwIndex++;
+
+	return dwIndex;
+}
+
+DWORD CPareData::SendToBd_XTZJ(DWORD dwLocalID, unsigned short nSelfFre, char* pSendBuffer)
+{
+	memcpy(pSendBuffer, "$XTZJ", 5);
+
+	DWORD dwIndex = 7;
+	//地址
+	pSendBuffer[dwIndex] = LOBYTE(HIWORD(dwLocalID));
+	dwIndex++;
+	pSendBuffer[dwIndex] = HIBYTE(LOWORD(dwLocalID));
+	dwIndex++;
+	pSendBuffer[dwIndex] = LOBYTE(LOWORD(dwLocalID));
+	dwIndex++;
+	//频度 
+	sprintf(pSendBuffer + dwIndex, "%d", swab16(nSelfFre));
+	dwIndex += 2;
+
+	sprintf(pSendBuffer + dwIndex, "%d", swab16(dwIndex + 1));
+	dwIndex += 2;
+
+	pSendBuffer[dwIndex] = ComputeCheckSum(pSendBuffer, dwIndex);
+	dwIndex++;
+	return dwIndex;
+}
+
+char CPareData::ExplainData_TCP(char* pSrcBuffer, DWORD dwBufferLen, char* pDestBuffer)
 {
 	char nReportID;
 	int i;
@@ -231,7 +344,7 @@ char CPareData::ExplainData_TCP(char* pSrcBuffer, unsigned long dwBufferLen, cha
 		return CUNPACK_NULL;
 
 	int  f_iCurLen;
-	unsigned long  f_dwTemp;//无符号
+	DWORD  f_dwTemp;//无符号
 
 	switch (nReportID)
 	{
@@ -317,7 +430,7 @@ char CPareData::ExplainData_TCP(char* pSrcBuffer, unsigned long dwBufferLen, cha
 	}
 }
 
-unsigned long CPareData::SendToDS_XTJC(unsigned long dwIndex, char* pSendBuffer)
+DWORD CPareData::SendToDS_XTJC(DWORD dwIndex, char* pSendBuffer)
 {
 	int f_iCurLen;
 
@@ -328,7 +441,7 @@ unsigned long CPareData::SendToDS_XTJC(unsigned long dwIndex, char* pSendBuffer)
 	f_iCurLen = 7;
 
 	sprintf(pSendBuffer + f_iCurLen, "%d", swab32(dwIndex));
-	f_iCurLen += sizeof(unsigned long);
+	f_iCurLen += sizeof(DWORD);
 	//长度
 	
 
@@ -342,7 +455,7 @@ unsigned long CPareData::SendToDS_XTJC(unsigned long dwIndex, char* pSendBuffer)
 	return f_iCurLen;
 }
 
-unsigned long CPareData::SendToDS_DWXX(tagPosInfo& stPosInfo, char* pSendBuffer)
+DWORD CPareData::SendToDS_DWXX(tagPosInfo& stPosInfo, char* pSendBuffer)
 {
 	int f_iCurLen;
 
@@ -400,7 +513,7 @@ unsigned long CPareData::SendToDS_DWXX(tagPosInfo& stPosInfo, char* pSendBuffer)
 	f_iCurLen++;
 	//高程
 	sprintf(pSendBuffer + f_iCurLen, "%d", swab32(stPosInfo.Altitude));
-	f_iCurLen += sizeof(unsigned long);
+	f_iCurLen += sizeof(DWORD);
 
 	//高程异常符号
 	pSendBuffer[f_iCurLen] = stPosInfo.nEfSign;
@@ -418,21 +531,21 @@ unsigned long CPareData::SendToDS_DWXX(tagPosInfo& stPosInfo, char* pSendBuffer)
 	return f_iCurLen;
 }
 
-unsigned long CPareData::SendToDS_TXXX(tagCommInfo& stCommInfo, char* pSendBuffer)
+DWORD CPareData::SendToDS_TXXX(tagCommInfo& stCommInfo, char* pSendBuffer)
 {
 	pSendBuffer[0] = '$';
 	memcpy(pSendBuffer + 1, "TXXX", 4);
 
-	unsigned long f_iCurLen;
+	DWORD f_iCurLen;
 
 	//用户机地址
 	f_iCurLen = 7;
 
 	sprintf(pSendBuffer + f_iCurLen, "%d", swab32(stCommInfo.LocalID));
-	f_iCurLen += sizeof(unsigned long);
+	f_iCurLen += sizeof(DWORD);
 
 	sprintf(pSendBuffer + f_iCurLen, "%d", swab32(stCommInfo.SrcAddress));
-	f_iCurLen += sizeof(unsigned long);
+	f_iCurLen += sizeof(DWORD);
 	//通信编码
 	pSendBuffer[f_iCurLen] = stCommInfo.ifBCD;
 	f_iCurLen++;
@@ -467,23 +580,23 @@ unsigned long CPareData::SendToDS_TXXX(tagCommInfo& stCommInfo, char* pSendBuffe
 	return f_iCurLen;
 }
 
-unsigned long CPareData::SendToDS_TXHZ(tagSendBackInfo& stSendBack, unsigned long dwSerialID, char* pSendBuffer)
+DWORD CPareData::SendToDS_TXHZ(tagSendBackInfo& stSendBack, DWORD dwSerialID, char* pSendBuffer)
 {
 	pSendBuffer[0] = '$';
 	memcpy(pSendBuffer + 1, "TXHZ", 4);
 
-	unsigned long f_iCurLen;
+	DWORD f_iCurLen;
 
 	//发送方地址
 	f_iCurLen = 7;
 	sprintf(pSendBuffer + f_iCurLen, "%d", swab32(stSendBack.dwSendID));
-	f_iCurLen += sizeof(unsigned long);
+	f_iCurLen += sizeof(DWORD);
 	//接收方地址
 	sprintf(pSendBuffer + f_iCurLen, "%d", swab32(stSendBack.dwRecvID));
-	f_iCurLen += sizeof(unsigned long);
+	f_iCurLen += sizeof(DWORD);
 	//通信流水号
 	sprintf(pSendBuffer + f_iCurLen, "%d", swab32(dwSerialID));
-	f_iCurLen += sizeof(unsigned long);
+	f_iCurLen += sizeof(DWORD);
 	//时间
 	pSendBuffer[f_iCurLen] = stSendBack.nHour;
 	f_iCurLen++;
@@ -502,18 +615,18 @@ unsigned long CPareData::SendToDS_TXHZ(tagSendBackInfo& stSendBack, unsigned lon
 	return f_iCurLen;
 }
 
-unsigned long CPareData::SendToDS_ZJXX(unsigned long dwMachineID, char nStatus, char* pSendBuffer)
+DWORD CPareData::SendToDS_ZJXX(DWORD dwMachineID, char nStatus, char* pSendBuffer)
 {
 	pSendBuffer[0] = '$';
 	memcpy(pSendBuffer + 1, "ZJXX", 4);
 
-	unsigned long f_iCurLen;
+	DWORD f_iCurLen;
 
 	//指挥机ID
 	f_iCurLen = 7;
 
 	sprintf(pSendBuffer + f_iCurLen, "%d", swab32(dwMachineID));
-	f_iCurLen += sizeof(unsigned long);
+	f_iCurLen += sizeof(DWORD);
 
 	//指挥机状态
 	pSendBuffer[f_iCurLen] = nStatus;
@@ -529,22 +642,22 @@ unsigned long CPareData::SendToDS_ZJXX(unsigned long dwMachineID, char nStatus, 
 	return f_iCurLen;
 }
 
-unsigned long CPareData::SendToDS_FKXX(unsigned long dwLocalID, unsigned long dwDestID, unsigned long dwSerialID, char nFeedResult, char* pSendBuffer)
+DWORD CPareData::SendToDS_FKXX(DWORD dwLocalID, DWORD dwDestID, DWORD dwSerialID, char nFeedResult, char* pSendBuffer)
 {
 	pSendBuffer[0] = '$';
 	memcpy(pSendBuffer + 1, "BDFK", 4);
 
-	unsigned long f_iCurLen;
+	DWORD f_iCurLen;
 	//指挥机ID
 	f_iCurLen = 7;
 	sprintf(pSendBuffer + f_iCurLen, "%d", swab32(dwLocalID));
-	f_iCurLen += sizeof(unsigned long);
+	f_iCurLen += sizeof(DWORD);
 	//目的ID
 		sprintf(pSendBuffer + f_iCurLen, "%d", swab32(dwDestID));
-	f_iCurLen += sizeof(unsigned long);
+	f_iCurLen += sizeof(DWORD);
 	//通信流水
 		sprintf(pSendBuffer + f_iCurLen, "%d", swab32(dwSerialID));
-	f_iCurLen += sizeof(unsigned long);
+	f_iCurLen += sizeof(DWORD);
 	//反馈标志
 	pSendBuffer[f_iCurLen] = nFeedResult;
 	f_iCurLen++;
@@ -559,12 +672,12 @@ unsigned long CPareData::SendToDS_FKXX(unsigned long dwLocalID, unsigned long dw
 	return f_iCurLen;
 }
 
-char CPareData::ExplainData_UDP(char* pSrcBuffer, char* pDestBuffer, unsigned long& dwExplainLen)
+char CPareData::ExplainData_UDP(char* pSrcBuffer, char* pDestBuffer, DWORD& dwExplainLen)
 {
 	char nReportID = pSrcBuffer[0];
 
-	unsigned long dwIndex = 1;
-	unsigned long dwTemp = 0;
+	DWORD dwIndex = 1;
+	DWORD dwTemp = 0;
 
 	switch (nReportID)
 	{
@@ -771,60 +884,13 @@ char CPareData::ExplainData_UDP(char* pSrcBuffer, char* pDestBuffer, unsigned lo
 	}
 }
 
-unsigned long CPareData::SendToBd_ICJC(unsigned long dwLocalID, char nFramNo, char* pSendBuffer)
-{
-	memcpy(pSendBuffer, "$ICJC", 5);
 
-	unsigned long dwIndex = 7;
-	pSendBuffer[dwIndex] = LOBYTE(HIWORD(dwLocalID));
-	dwIndex++;
-	pSendBuffer[dwIndex] = HIBYTE(LOWORD(dwLocalID));
-	dwIndex++;
-	pSendBuffer[dwIndex] = LOBYTE(LOWORD(dwLocalID));
-	dwIndex++;
-	//帧号
-	pSendBuffer[dwIndex] = nFramNo;
-	dwIndex++;
-	//长度
-	sprintf(pSendBuffer + dwIndex, "%d", swab16(dwIndex + 1));
-	dwIndex += 2;
-	//校验
-	pSendBuffer[dwIndex] = ComputeCheckSum(pSendBuffer, dwIndex);
-	dwIndex++;
-
-	return dwIndex;
-}
-
-unsigned long CPareData::SendToBd_XTZJ(unsigned long dwLocalID, unsigned short nSelfFre, char* pSendBuffer)
-{
-	memcpy(pSendBuffer, "$XTZJ", 5);
-
-	unsigned long dwIndex = 7;
-	//地址
-	pSendBuffer[dwIndex] = LOBYTE(HIWORD(dwLocalID));
-	dwIndex++;
-	pSendBuffer[dwIndex] = HIBYTE(LOWORD(dwLocalID));
-	dwIndex++;
-	pSendBuffer[dwIndex] = LOBYTE(LOWORD(dwLocalID));
-	dwIndex++;
-	//频度 
-	sprintf(pSendBuffer + dwIndex, "%d", swab16(nSelfFre));
-	dwIndex += 2;
-
-	sprintf(pSendBuffer + dwIndex, "%d", swab16(dwIndex + 1));
-	dwIndex += 2;
-
-	pSendBuffer[dwIndex] = ComputeCheckSum(pSendBuffer, dwIndex);
-	dwIndex++;
-	return dwIndex;
-}
-
-unsigned long CPareData::SendToBd_TXSQ(tagCommReq& stReq, char* pSendBuffer)
+DWORD CPareData::SendToBd_TXSQ(tagCommReq& stReq, char* pSendBuffer)
 {
 	memcpy(pSendBuffer, "$TXSQ", 5);
 
-	unsigned long f_iCurLen;
-	unsigned long f_dwTemp;
+	DWORD f_iCurLen;
+	DWORD f_dwTemp;
 
 	//本机地址
 	f_iCurLen = 7;
@@ -883,10 +949,10 @@ unsigned long CPareData::SendToBd_TXSQ(tagCommReq& stReq, char* pSendBuffer)
 	return f_iCurLen;
 }
 
-char CPareData::ComputeCheckSum(char * Buff, unsigned long Len)
+char CPareData::ComputeCheckSum(char * Buff, DWORD Len)
 {
 	char CheckSum = 0;
-	for (unsigned long i = 0; i<Len; i++)
+	for (DWORD i = 0; i<Len; i++)
 		CheckSum ^= Buff[i];
 	return CheckSum;
 }

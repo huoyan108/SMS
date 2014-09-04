@@ -27,9 +27,6 @@
     <ClInclude Include="MsgStructInfo.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="MyVector.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="CNDef.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -51,6 +48,9 @@
     <ClInclude Include="IniOper.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="proto\smsTx.pb.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ComDev.cpp">
@@ -63,9 +63,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ComUnit.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="MyVector.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="PrintMsg.cpp">
@@ -92,11 +89,15 @@
     <ClCompile Include="IniOper.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="proto\smsTx.pb.cc">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <None Include="bulid\ini.lua" />
+    <None Include="proto\smsTx.proto" />
   </ItemGroup>
 </Project>

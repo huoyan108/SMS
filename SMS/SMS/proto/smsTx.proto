@@ -1,0 +1,14 @@
+message BdfsMsg
+{
+	required int64 nSerialId = 1;
+	required int64 nSourceAddress =2;
+	required int64 nDestAddress = 3;
+	required int32 nMsgType = 4;
+	required int32 nInfoLen = 5;
+	required string sInfoBuff = 6;
+}
+message FsfkMsg
+{
+	required int64 nSerialId = 1;
+	required int32 nRes = 2;
+}
