@@ -1,5 +1,6 @@
 #include "DataBusiness.h"
 #include "IniOper.h"
+#include "UnitsManager.h"
 
 //互斥锁
 pthread_mutex_t g_busiessData_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -11,7 +12,7 @@ CDataBusiness * g_pDataBusiness = NULL;
 
 int NotifFun(char * sendName, void *pReq)
 {
-	g_pDataBusiness->SetBusiessData((BdfsMsg *)pReq);
+	g_pDataBusiness->SetBusiessData((tagBdReq *)pReq);
 	return 1;
 }
 
@@ -20,26 +21,62 @@ CDataBusiness::CDataBusiness()
 	g_pDataBusiness = this;
 	pthread_create(&m_DataBusinessPt, NULL, threadBusiess, this);
 
-	//获得通信端口参数
-	char cPath[1000];
-	bzero(cPath, sizeof(cPath));
+
 
 	CIniOper ini;
 
+	//获取路径
+	char cPath[1000];
+	bzero(cPath, sizeof(cPath));
 	if (ini.GetSoftPath(cPath, sizeof(cPath)) != 0)
 	{
 		exit(0);
 	}
 	strcat(cPath, "ini.lua");
+
+	//获取参数
 	int nRequestPort;
 	int nRespondPort;
-	if (ini.load(cPath, &nRequestPort, &nRespondPort) != 0)
+	char cSoftName[100];
+	bzero(cSoftName, sizeof(cSoftName));
+
+	if (ini.load(cPath, &nRequestPort, &nRespondPort, cSoftName) != 0)
 	{
+		printf("read ini error!\n");
 		exit(0);
 	}
 	
 	//开启中转通信服务
-	m_treansfer.StartZmq(nRequestPort, nRespondPort, NotifFun);
+	m_treansfer.StartZmq(nRequestPort, nRespondPort, cSoftName,NotifFun);
+
+
+	//获取数据库连接参数
+	PGConnInfo conn;
+	char dbhost[100];
+	char dbport[100];
+	char dbname[100];
+	char dbuser[100];
+	char dbpwd[100];
+	if (ini.load(cPath, dbhost,dbport,dbname,dbuser,dbpwd) != 0)
+	{
+		printf("read ini error!\n");
+
+		exit(0);
+	}
+	conn.pghost = (char*)dbhost;
+	conn.pgport = (char*)dbport;
+	conn.dbName = (char*)dbname;
+	conn.login = (char*)dbuser;
+	conn.passwd = (char*)dbpwd;
+
+	//连接数据库
+	if (0 != m_db.Connect(conn))
+	{
+		printf("connect Db error!\n");
+
+		exit(0);
+	}
+	printf("connect Db OK\n");
 }
 
 
@@ -111,29 +148,79 @@ int CDataBusiness::ProcessBusiess()
 
 	char cSendBuff[1024];
 	bzero(cSendBuff, sizeof(cSendBuff));
-	DWORD nSendLength;
+	DWORD nSendLength = 0;
 	while (!resdataList.empty())
 	{
 		printf("send Feedback\n");
 
 		FeedbackInfo  FeedbackInfo = resdataList.front();
-		//parseData.SendToDS_FKXX(FeedbackInfo, cSendBuff,nSendLength);
-		//m_treansfer.SendData(cSendBuff, nSendLength);
+
+		//更新数据库
+		struct tm * timeinfo;
+		timeinfo = localtime(&FeedbackInfo.sendtime);
+		printf("The Send date/time is: %s", asctime(timeinfo));
+		char sSql[256];
+		bzero(sSql, sizeof(sSql));
+		//UPDATE 表名称 SET 列名称 = 新值 WHERE 列名称 = 某值
+		sprintf(sSql, "update bss_bdfs set send_time=to_date('%s','YYYY-MM-DD H24:MI:SS'),send_times=%d,status=%d",
+			asctime(timeinfo),
+			FeedbackInfo.sendtimes,
+			FeedbackInfo.FeedResult);
+		m_db.Exec(sSql);
+
+		//打包
+		parseData.SendToDS_FKXX(FeedbackInfo.dwSerialID,
+			FeedbackInfo.FeedResult,
+			cSendBuff, 
+			nSendLength);
+		//发送
+		m_treansfer.SendData(cSendBuff, nSendLength);
 	}
 	return TRUE;
 }
+
 // 设置业务数据
-int CDataBusiness::SetBusiessData(BdfsMsg *pCommReq)
+int CDataBusiness::SetBusiessData(tagBdReq *pCommReq)
 {
-	//pthread_mutex_lock(&g_busiessData_mutex);
-	//m_dataList.push_back(pCommReq);
-	//pthread_mutex_unlock(&g_busiessData_mutex);
-	//存入数据库(待加)
+	//存入数据库
+	//获取当前时间
+	time_t currtime;
+	struct tm * timeinfo;
 
+	time(&currtime);
+	timeinfo = localtime(&currtime);
+	printf("The current date/time is: %s", asctime(timeinfo));
+	char sSql[256];
+	bzero(sSql, sizeof(sSql));
+
+	sprintf(sSql,"insert into bss_bdfs(id,sender,recver,msg_len,msg_data,msg_type,submit_time) values (bss_bdfs_id_seq.nextval,%ld,%ld,%ld,'%s','%d',to_date('%s','YYYY-MM-DD H24:MI:SS'))",
+		pCommReq->SourceAddress,
+		pCommReq->DestAddress,
+		pCommReq->InfoLen,
+		pCommReq->InfoBuff,
+		pCommReq->nMsgType,
+		asctime(timeinfo));
+	m_db.Exec(sSql);
 	//解析存入控制模块
-	g_pComManager->SetSendMsg(pCommReq);
+	FeedbackInfo stBackInfo;
 
-	//设置反馈，已收到BDFS请求
+	if (g_pComManager->SetSendMsg(pCommReq) == TRUE)
+	{
+		//设置反馈，提交成功
+		stBackInfo.dwSerialID = pCommReq->dwSerialID;
+		stBackInfo.FeedResult = 0;
+
+		SetFeedResData(stBackInfo);
+	}
+	else
+	{
+		//提交失败
+		stBackInfo.dwSerialID = pCommReq->dwSerialID;
+		stBackInfo.FeedResult = 3;
+
+		SetFeedResData(stBackInfo);
+	}
+	
 
 	return 0;
 }

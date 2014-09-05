@@ -1,11 +1,13 @@
 #pragma once
 #include <list>
 #include <string.h>
-#include "UnitsManager.h"
+#include <time.h>
+
 using namespace std;
 #include "PareData.h"
 #include "DataTransfer.h"
-#include "./proto/smsTx.pb.h"
+#include "PGDatabase.h"
+
 class CDataBusiness
 {
 public:
@@ -20,12 +22,14 @@ public:
 	int ProcessBusiess();
 
 protected:
+	PGDatabase m_db;
+
 	friend int NotifFun(char * sendName, void *pReq);
 
 	CDataTransfer m_treansfer;
 
 	// 设置业务数据
-	int SetBusiessData(BdfsMsg *pCommReq);
+	int SetBusiessData(tagBdReq *pCommReq);
 
 	//解析打包
 	CPareData parseData;

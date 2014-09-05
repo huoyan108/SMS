@@ -37,5 +37,7 @@ public:
 	map<char *, ALARMTAG *> m_TimerMap;
 	//接收线程句柄
 	pthread_t m_TimerPt;		
+	// 修改定时器
+	int ModifTimer(char *pId, DWORD nTime);
 };
 

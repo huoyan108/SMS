@@ -1,5 +1,7 @@
 #ifndef _MSGSTRUCTINFO_H_
 #define _MSGSTRUCTINFO_H_
+#include <time.h>
+using namespace std;
 #define DWORD unsigned long
 #define BYTE unsigned char
 
@@ -7,7 +9,9 @@
 */
 #define PROCESS_FRAME_DATA_LENGTH  1024 //数据处理帧长度
 
-#define FSF_LEGHTH 100  //发送方占位长度
+#define FSF_LEGHTH 20  //发送方占位长度
+
+#define JSF_LEGHTH 20 //接收方占位长度
 
 #define SJCD_LEGHT 2 //数据长度占位长度
 /*要用到的
@@ -69,15 +73,46 @@ enum
 	MACHINE_STATUS_WORK, //正常工作
 	MACHINE_STATUS_MASK //屏蔽状态
 };
+//自检信息
+typedef struct tagSelfCheckInfo
+{
+	DWORD LocalID;
+	char ICCardState;		// IC卡状态
+	char HardState;		// 硬件状态
+	char Batterystate;		// 电池电量
+	char InState;			// 入站状态
+	char PowerState[6];	// 功率状况
+}SelfCheckInfo, *lpSelfCheckInfo;
 
+//反馈信息
+typedef struct tagFeedbackInfo
+{
+	DWORD dwSerialID; //发送序号
+	DWORD LocalID;
+	char FeedResult; //反馈结果
+	char Reserve[10];   // 保留
+	time_t sendtime;	//发送时间
+	int sendtimes;		//发送次数
+}FeedbackInfo, *lpFeedbackInfo;
 
+//数据处理结构体
+struct tagFrameData
+{
+	DWORD dwSerialID;		//发送序号
+	char pFrameData[PROCESS_FRAME_DATA_LENGTH];
+	DWORD dwFrameDataLen; //数据长度
+	int send_times;		//发送次数
+	//DATA_FROM_TYPE eFromType; //数据来源
+	//char nComID; //串口号
+	//char cDev[20];
+};
 //通信请求/北斗发送（中转到发送）
 typedef struct tagBdReq
 {
 	DWORD dwSerialID; //发送序号
 	DWORD SourceAddress;		//发送方地址  发送方为0，接收方有地址则任意指挥机发送
 	DWORD DestAddress;			//接收方地址	接收方为0，发送方有地址则通播
-	int  ifBCD;							//0:汉字    1:代码 2：混发
+	int  nMsgType;							//0:汉字    1:代码 2：混发
 	DWORD InfoLen;			//数据长度(单位：Bit)  不能传字节数，因为BCD可能不是整字节
 	char  InfoBuff[211];	//汉字:Max 120个  BCD:Max 420
 
@@ -100,6 +135,7 @@ typedef struct tagBdReq
 /************************************************************************/
 typedef struct tagCardInfoRead
 {
+	char cDev[20];				//串口号
 	DWORD LocalID;
 	char FrameNum;				//帪号
 	//第0帧数据用到的变量
@@ -115,24 +151,7 @@ typedef struct tagCardInfoRead
 	DWORD lpSubUserAddrs[100];	//指向下级用户地址的指针
 } CardInfoRead, *lpCardInfoRead;
 
-//自检信息
-typedef struct tagSelfCheckInfo
-{
-	DWORD LocalID;
-	char ICCardState;		// IC卡状态
-	char HardState;		// 硬件状态
-	char Batterystate;		// 电池电量
-	char InState;			// 入站状态
-	char PowerState[6];	// 功率状况
-}SelfCheckInfo, *lpSelfCheckInfo;
 
-//反馈信息
-typedef struct tagFeedbackInfo
-{
-	DWORD LocalID;
-	char FeedResult; //反馈结果
-	char Reserve[10];   // 保留
-}FeedbackInfo, *lpFeedbackInfo;
 
 /************************************************************************/
 ///用户机到外设                                                     
@@ -255,13 +274,5 @@ typedef struct tagSysInial
 	DWORD dwListCount; //用户机队列最大个数
 }SysInial;
 
-//数据处理结构体
-struct tagFrameData
-{
-	char pFrameData[PROCESS_FRAME_DATA_LENGTH];
-	DWORD dwFrameDataLen; //数据长度
-	DATA_FROM_TYPE eFromType; //数据来源
-	char nComID; //串口号
-	char cDev[20];
-};
+
 #endif

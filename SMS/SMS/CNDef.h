@@ -25,10 +25,10 @@
 #define unlikely(x)
 #endif
 
-static union{
-	char c[4];
-	DWORD l;
-}endian_test={{'l','?','?','b'}};
+//static union{
+//	char c[4];
+//	DWORD l;
+//}endian_test={{'l','?','?','b'}};
 #define ENDIANNESS ((char)endian_test.l)
 #define ISBIGENDIAN (ENDIANNESS=='b')
 

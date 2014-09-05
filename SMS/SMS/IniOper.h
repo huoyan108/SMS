@@ -25,6 +25,7 @@ public:
 	CIniOper();
 	~CIniOper();
 	int GetSoftPath(char *cPath, int nSize);
-	int load(char *filename, int *nRequestPort, int *nRespondPort);
+	int load(char *filename, int *nRequestPort, int *nRespondPort,char *pSoftName);
+	int load(char *filename, char *dbhost, char * dbport, char * dbname, char * dbuser, char * dbpwd);
 };
 

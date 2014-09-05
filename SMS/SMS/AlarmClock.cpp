@@ -118,3 +118,21 @@ int CAlarmClock::ProcessTime()
 
 	return TRUE;
 }
+
+
+// ÐÞ¸Ä¶¨Ê±Æ÷
+int CAlarmClock::ModifTimer(char *pId, DWORD nTime)
+{
+	printf("ModifTimer %s\n", pId);
+
+	pthread_mutex_lock(&g_alarm_mutex);
+	map<char *, ALARMTAG*>::iterator it = m_TimerMap.find(pId);
+	if (it != m_TimerMap.end())
+	{
+		ALARMTAG *pAlarmTag = it->second;
+		pAlarmTag->nTimeoOutFlag = -1;
+		pAlarmTag->nDefTime = nTime;
+	}
+	pthread_mutex_unlock(&g_alarm_mutex);
+	return 0;
+}

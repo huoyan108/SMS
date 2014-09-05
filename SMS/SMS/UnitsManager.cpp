@@ -32,8 +32,8 @@ int  FeedBackFun(int nStyle, void *object)
 		{
 			printf("SJREQ\n");
 
-			g_pComManager->SetDevSendMsg((int)*object);
-			g_pComManager->ControlDevSend((int)*object);
+			g_pComManager->SetDevSendMsg(*((int *)object));
+			g_pComManager->ControlDevSend(*((int*)object));
 						
 		}
 		break;
@@ -54,7 +54,9 @@ int  FeedBackFun(int nStyle, void *object)
 			//DWORD lpSubUserAddrs[100];	//指向下级用户地址的指针
 			CardInfoRead *pIcInfo = (CardInfoRead *)object;
 			//ShowMachineMsg(m_nComID, m_stCardInfo.LocalID, m_stCardInfo.ServeFreq, m_dwCommReqLen, m_nBroadCastID);
-			printf("LocalID:%ld  ServeFreq:%ld\n", pIcInfo->LocalID, pIcInfo->ServeFreq);
+			//修改定时发送频度
+			g_pComManager->m_AlarmClock.ModifTimer(pIcInfo->cDev, pIcInfo->ServeFreq);
+			printf("LocalID:%ld  ServeFreq:%d\n", pIcInfo->LocalID, pIcInfo->ServeFreq);
 		}
 			break;
 		case FEEDBACK_ZJXX:	//自检信息
@@ -75,69 +77,83 @@ int  FeedBackFun(int nStyle, void *object)
 			printf("FKXX\n");
 
 			FeedbackInfo *pFeedBack = (FeedbackInfo*)object;
-			char cMsg[100] = { 0 };
+			//char cMsg[100] = { 0 };
 			char cResult = pFeedBack->FeedResult;
 	
-			switch (cResult)
+			if (cResult == 0)
 			{
-				case 0:
-				{
-					if (memcmp(pFeedBack->Reserve, "TXSQ", 4) == 0)
-					{
-						sprintf(cMsg, "TX SUCCESS\n");
-						return TRUE;
-					}
-				}
-					break;
-				case 1:
-				{
-					//strMsg.Format("反馈信息: %s 失败", pResult);
-				}
-					break;
-				case 2:
-				{
-					//sprintf(strMsg.c_str, "反馈信息: %s 失败");
-
-					//strMsg.Format("反馈信息:信号未锁定，未发射！");
-				}
-					break;
-				case 3:
-				{
-					//strMsg.Format("反馈信息:电量不足，发射抑制！");
-				}
-					break;
-				case 4:
-				{
-					//strMsg.Format("反馈信息:服务频度未到，需等待%d秒！",
-					//pResult[0] * 1000 + pResult[1] * 100 + pResult[2] * 10 + pResult[3]);
-				}
-					break;
-				case 5:
-				{
-					//strMsg.Format("反馈信息:加解密错误！");
-				}
-					break;
-				case 6:
-				{
-					//strMsg.Format("反馈信息:CRC错误！%s", pResult);
-				}
-					break;
-				case 7:
-				{
-					//strMsg.Format("反馈信息:系统抑制！");
-				}
-					break;
-				case 8:
-				{
-					//strMsg.Format("反馈信息:无线静默！");
-				}
-					break;
+				printf("BDTX SUCCESS!\n");
 			}
+			else
+			{
+				printf("BDTX ERROR!\n");
+
+			}
+			//switch (cResult)
+			//{
+			//	case 0:
+			//	{
+			//		if (memcmp(pFeedBack->Reserve, "TXSQ", 4) == 0)
+			//		{
+			//			sprintf(cMsg, "TX SUCCESS\n");
+			//			return TRUE;
+			//		}
+			//	}
+			//		break;
+			//	case 1:
+			//	{
+			//		//strMsg.Format("反馈信息: %s 失败", pResult);
+			//	}
+			//		break;
+			//	case 2:
+			//	{
+			//		//sprintf(strMsg.c_str, "反馈信息: %s 失败");
+
+			//		//strMsg.Format("反馈信息:信号未锁定，未发射！");
+			//	}
+			//		break;
+			//	case 3:
+			//	{
+			//		//strMsg.Format("反馈信息:电量不足，发射抑制！");
+			//	}
+			//		break;
+			//	case 4:
+			//	{
+			//		//strMsg.Format("反馈信息:服务频度未到，需等待%d秒！",
+			//		//pResult[0] * 1000 + pResult[1] * 100 + pResult[2] * 10 + pResult[3]);
+			//	}
+			//		break;
+			//	case 5:
+			//	{
+			//		//strMsg.Format("反馈信息:加解密错误！");
+			//	}
+			//		break;
+			//	case 6:
+			//	{
+			//		//strMsg.Format("反馈信息:CRC错误！%s", pResult);
+			//	}
+			//		break;
+			//	case 7:
+			//	{
+			//		//strMsg.Format("反馈信息:系统抑制！");
+			//	}
+			//		break;
+			//	case 8:
+			//	{
+			//		//strMsg.Format("反馈信息:无线静默！");
+			//	}
+			//		break;
+			//	case 9:
+			//	{
+			//		//strMsg.Format("推送串口失败！");
+			//	}
+			//		break;
+			//}
+			g_pComManager->business.SetFeedResData(*pFeedBack);
 		}
 
 		
 	}
-	//g_pComManager->m_devMap["ad"];
 	return TRUE;
 }
 // 添加设备
@@ -154,9 +170,7 @@ int CUnitsManager::AddComDev(char *Dev,
 	{
 		return FALSE;
 	}
-	//自检
-	SendICJC(Dev);
-	SendXTZJ(Dev,5);
+
 
 	pthread_mutex_lock(&g_unitsSendData_mutex);
 
@@ -164,6 +178,10 @@ int CUnitsManager::AddComDev(char *Dev,
 	m_AlarmClock.AddATimer(Dev, 10);
 
 	pthread_mutex_unlock(&g_unitsSendData_mutex);
+
+	//自检
+	SendICJC(Dev);
+	SendXTZJ(Dev, 5);
 
 	printf("Add Dev %s Success\n", Dev);
 	return TRUE;
@@ -252,7 +270,7 @@ int CUnitsManager::ControlDevSend(unsigned long nLocalId)
 	return 0;
 }
 // 向设备添加发送信息
-int CUnitsManager::SetDevSendMsg(unsigned long nLocalId, BdfsMsg *pData)
+int CUnitsManager::SetDevSendMsg(unsigned long nLocalId, tagBdReq *pData)
 {
 	CComUnit *comDevPt = NULL;
 	if (g_pComManager->GetComDevFromLocalId(&comDevPt, nLocalId) != TRUE)
@@ -260,7 +278,7 @@ int CUnitsManager::SetDevSendMsg(unsigned long nLocalId, BdfsMsg *pData)
 		return FALSE;
 	}
 
-	BdfsMsg DataTemp;
+	tagBdReq DataTemp;
 	if (pData == NULL)
 	{
 		pthread_mutex_lock(&g_unitsSendData_mutex);
@@ -273,9 +291,10 @@ int CUnitsManager::SetDevSendMsg(unsigned long nLocalId, BdfsMsg *pData)
 	{
 		memcpy(&DataTemp, pData, sizeof(DataTemp));
 	}
-	//北斗发送打包
+	//北斗发送信息打包
 	tagFrameData FrameData;
-	m_parse.SendToBd_TXSQ(DataTemp, FrameData.pFrameData, Data.dwFrameDataLen)
+	m_parse.SendToBd_TXSQ(DataTemp, FrameData.pFrameData, FrameData.dwFrameDataLen);
+	FrameData.dwSerialID = DataTemp.dwSerialID;
 
 	if (comDevPt->SetSendMsg(FrameData) != TRUE)
 	{
@@ -285,23 +304,23 @@ int CUnitsManager::SetDevSendMsg(unsigned long nLocalId, BdfsMsg *pData)
 }
 
 //设置发送信息
-int CUnitsManager::SetSendMsg(BdfsMsg *pData)
+int CUnitsManager::SetSendMsg(tagBdReq *pData)
 {
 
 	pthread_mutex_lock(&g_unitsSendData_mutex);
 
 	//指定指挥机的通播
-	if (pData->ndestaddress == 0 && pData->nsourceaddress != 0)
+	if (pData->DestAddress == 0 && pData->SourceAddress != 0)
 	{
 		//指定设备加载数据
-		if (SetDevSendMsg(pData->nsourceaddress, pData) != TRUE)
+		if (SetDevSendMsg(pData->SourceAddress, pData) != TRUE)
 		{
 			m_dataList.push_back(*pData);
 		}
 
 	}
 	//任意指挥机发送
-	else if (pData->ndestaddress != 0)
+	else if (pData->DestAddress != 0)
 	{
 		m_dataList.push_back(*pData);
 
@@ -336,7 +355,7 @@ int CUnitsManager::GetComDevFromLocalId(CComUnit** comDevPt, unsigned long nLoca
 {
 	pthread_mutex_lock(&g_unitsSendData_mutex);
 
-	map<string, CComUnit*>::iterator it = m_devMap.begin;
+	map<string, CComUnit*>::iterator it = m_devMap.begin();
 	while (it != m_devMap.end())
 	{
 		*comDevPt = it->second;

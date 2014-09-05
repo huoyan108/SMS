@@ -105,10 +105,10 @@ void protobuf_AddDesc_smsTx_2eproto() {
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\013smsTx.proto\"\201\001\n\007BdfsMsg\022\021\n\tnSerialId\030\001"
-    " \002(\003\022\026\n\016nSourceAddress\030\002 \002(\003\022\024\n\014nDestAdd"
-    "ress\030\003 \002(\003\022\020\n\010nMsgType\030\004 \002(\005\022\020\n\010nInfoLen"
-    "\030\005 \002(\005\022\021\n\tsInfoBuff\030\006 \002(\t\"*\n\007FsfkMsg\022\021\n\t"
-    "nSerialId\030\001 \002(\003\022\014\n\004nRes\030\002 \002(\005", 189);
+    " \002(\r\022\026\n\016nSourceAddress\030\002 \002(\r\022\024\n\014nDestAdd"
+    "ress\030\003 \002(\r\022\020\n\010nMsgType\030\004 \002(\r\022\020\n\010nInfoLen"
+    "\030\005 \002(\r\022\021\n\tsInfoBuff\030\006 \002(\t\"*\n\007FsfkMsg\022\021\n\t"
+    "nSerialId\030\001 \002(\r\022\014\n\004nRes\030\002 \002(\r", 189);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "smsTx.proto", &protobuf_RegisterTypes);
   BdfsMsg::default_instance_ = new BdfsMsg();
@@ -152,11 +152,11 @@ BdfsMsg::BdfsMsg(const BdfsMsg& from)
 
 void BdfsMsg::SharedCtor() {
   _cached_size_ = 0;
-  nserialid_ = GOOGLE_LONGLONG(0);
-  nsourceaddress_ = GOOGLE_LONGLONG(0);
-  ndestaddress_ = GOOGLE_LONGLONG(0);
-  nmsgtype_ = 0;
-  ninfolen_ = 0;
+  nserialid_ = 0u;
+  nsourceaddress_ = 0u;
+  ndestaddress_ = 0u;
+  nmsgtype_ = 0u;
+  ninfolen_ = 0u;
   sinfobuff_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -196,11 +196,11 @@ BdfsMsg* BdfsMsg::New() const {
 
 void BdfsMsg::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    nserialid_ = GOOGLE_LONGLONG(0);
-    nsourceaddress_ = GOOGLE_LONGLONG(0);
-    ndestaddress_ = GOOGLE_LONGLONG(0);
-    nmsgtype_ = 0;
-    ninfolen_ = 0;
+    nserialid_ = 0u;
+    nsourceaddress_ = 0u;
+    ndestaddress_ = 0u;
+    nmsgtype_ = 0u;
+    ninfolen_ = 0u;
     if (has_sinfobuff()) {
       if (sinfobuff_ != &::google::protobuf::internal::kEmptyString) {
         sinfobuff_->clear();
@@ -217,12 +217,12 @@ bool BdfsMsg::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required int64 nSerialId = 1;
+      // required uint32 nSerialId = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &nserialid_)));
           set_has_nserialid();
         } else {
@@ -232,13 +232,13 @@ bool BdfsMsg::MergePartialFromCodedStream(
         break;
       }
 
-      // required int64 nSourceAddress = 2;
+      // required uint32 nSourceAddress = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_nSourceAddress:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &nsourceaddress_)));
           set_has_nsourceaddress();
         } else {
@@ -248,13 +248,13 @@ bool BdfsMsg::MergePartialFromCodedStream(
         break;
       }
 
-      // required int64 nDestAddress = 3;
+      // required uint32 nDestAddress = 3;
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_nDestAddress:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &ndestaddress_)));
           set_has_ndestaddress();
         } else {
@@ -264,13 +264,13 @@ bool BdfsMsg::MergePartialFromCodedStream(
         break;
       }
 
-      // required int32 nMsgType = 4;
+      // required uint32 nMsgType = 4;
       case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_nMsgType:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &nmsgtype_)));
           set_has_nmsgtype();
         } else {
@@ -280,13 +280,13 @@ bool BdfsMsg::MergePartialFromCodedStream(
         break;
       }
 
-      // required int32 nInfoLen = 5;
+      // required uint32 nInfoLen = 5;
       case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_nInfoLen:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &ninfolen_)));
           set_has_ninfolen();
         } else {
@@ -331,29 +331,29 @@ bool BdfsMsg::MergePartialFromCodedStream(
 
 void BdfsMsg::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // required int64 nSerialId = 1;
+  // required uint32 nSerialId = 1;
   if (has_nserialid()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(1, this->nserialid(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->nserialid(), output);
   }
 
-  // required int64 nSourceAddress = 2;
+  // required uint32 nSourceAddress = 2;
   if (has_nsourceaddress()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(2, this->nsourceaddress(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->nsourceaddress(), output);
   }
 
-  // required int64 nDestAddress = 3;
+  // required uint32 nDestAddress = 3;
   if (has_ndestaddress()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(3, this->ndestaddress(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(3, this->ndestaddress(), output);
   }
 
-  // required int32 nMsgType = 4;
+  // required uint32 nMsgType = 4;
   if (has_nmsgtype()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->nmsgtype(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(4, this->nmsgtype(), output);
   }
 
-  // required int32 nInfoLen = 5;
+  // required uint32 nInfoLen = 5;
   if (has_ninfolen()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->ninfolen(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(5, this->ninfolen(), output);
   }
 
   // required string sInfoBuff = 6;
@@ -373,29 +373,29 @@ void BdfsMsg::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* BdfsMsg::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // required int64 nSerialId = 1;
+  // required uint32 nSerialId = 1;
   if (has_nserialid()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(1, this->nserialid(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->nserialid(), target);
   }
 
-  // required int64 nSourceAddress = 2;
+  // required uint32 nSourceAddress = 2;
   if (has_nsourceaddress()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(2, this->nsourceaddress(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->nsourceaddress(), target);
   }
 
-  // required int64 nDestAddress = 3;
+  // required uint32 nDestAddress = 3;
   if (has_ndestaddress()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(3, this->ndestaddress(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(3, this->ndestaddress(), target);
   }
 
-  // required int32 nMsgType = 4;
+  // required uint32 nMsgType = 4;
   if (has_nmsgtype()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->nmsgtype(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(4, this->nmsgtype(), target);
   }
 
-  // required int32 nInfoLen = 5;
+  // required uint32 nInfoLen = 5;
   if (has_ninfolen()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->ninfolen(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(5, this->ninfolen(), target);
   }
 
   // required string sInfoBuff = 6;
@@ -419,38 +419,38 @@ int BdfsMsg::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required int64 nSerialId = 1;
+    // required uint32 nSerialId = 1;
     if (has_nserialid()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int64Size(
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->nserialid());
     }
 
-    // required int64 nSourceAddress = 2;
+    // required uint32 nSourceAddress = 2;
     if (has_nsourceaddress()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int64Size(
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->nsourceaddress());
     }
 
-    // required int64 nDestAddress = 3;
+    // required uint32 nDestAddress = 3;
     if (has_ndestaddress()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int64Size(
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->ndestaddress());
     }
 
-    // required int32 nMsgType = 4;
+    // required uint32 nMsgType = 4;
     if (has_nmsgtype()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->nmsgtype());
     }
 
-    // required int32 nInfoLen = 5;
+    // required uint32 nInfoLen = 5;
     if (has_ninfolen()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->ninfolen());
     }
 
@@ -574,8 +574,8 @@ FsfkMsg::FsfkMsg(const FsfkMsg& from)
 
 void FsfkMsg::SharedCtor() {
   _cached_size_ = 0;
-  nserialid_ = GOOGLE_LONGLONG(0);
-  nres_ = 0;
+  nserialid_ = 0u;
+  nres_ = 0u;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -611,8 +611,8 @@ FsfkMsg* FsfkMsg::New() const {
 
 void FsfkMsg::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    nserialid_ = GOOGLE_LONGLONG(0);
-    nres_ = 0;
+    nserialid_ = 0u;
+    nres_ = 0u;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -624,12 +624,12 @@ bool FsfkMsg::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // required int64 nSerialId = 1;
+      // required uint32 nSerialId = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &nserialid_)));
           set_has_nserialid();
         } else {
@@ -639,13 +639,13 @@ bool FsfkMsg::MergePartialFromCodedStream(
         break;
       }
 
-      // required int32 nRes = 2;
+      // required uint32 nRes = 2;
       case 2: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_nRes:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &nres_)));
           set_has_nres();
         } else {
@@ -673,14 +673,14 @@ bool FsfkMsg::MergePartialFromCodedStream(
 
 void FsfkMsg::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // required int64 nSerialId = 1;
+  // required uint32 nSerialId = 1;
   if (has_nserialid()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(1, this->nserialid(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->nserialid(), output);
   }
 
-  // required int32 nRes = 2;
+  // required uint32 nRes = 2;
   if (has_nres()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->nres(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->nres(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -691,14 +691,14 @@ void FsfkMsg::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* FsfkMsg::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // required int64 nSerialId = 1;
+  // required uint32 nSerialId = 1;
   if (has_nserialid()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt64ToArray(1, this->nserialid(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->nserialid(), target);
   }
 
-  // required int32 nRes = 2;
+  // required uint32 nRes = 2;
   if (has_nres()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->nres(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->nres(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -712,17 +712,17 @@ int FsfkMsg::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // required int64 nSerialId = 1;
+    // required uint32 nSerialId = 1;
     if (has_nserialid()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int64Size(
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->nserialid());
     }
 
-    // required int32 nRes = 2;
+    // required uint32 nRes = 2;
     if (has_nres()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->nres());
     }
 

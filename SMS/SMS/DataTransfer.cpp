@@ -19,8 +19,11 @@ CDataTransfer::~CDataTransfer()
 
 
 // 初始化ZMQ
-int CDataTransfer::StartZmq(int nRequestPort, int nRespondPort, zmqNotif notifFun)
+int CDataTransfer::StartZmq(int nRequestPort, int nRespondPort, char *pSoftName,zmqNotif notifFun)
 {
+	bzero(m_sSoftName, sizeof(m_sSoftName));
+	strcat(m_sSoftName, pSoftName);
+
 	char addr[100] = { 0 };
 	bzero(addr, sizeof(addr));
 
@@ -118,31 +121,18 @@ int CDataTransfer::RecvData()
 			BdfsMsg bdfsMsg;
 			if (bdfsMsg.ParseFromString(m_nRecvBuff))
 			{
+				tagBdReq bdReq;
+				bdReq.SourceAddress = bdfsMsg.nsourceaddress();
+				bdReq.DestAddress = bdfsMsg.ndestaddress();
+				bdReq.dwSerialID = bdfsMsg.nserialid();
+				bdReq.nMsgType = bdfsMsg.nmsgtype();
+				bdReq.InfoLen = bdfsMsg.ninfolen();
+				memcpy(bdReq.InfoBuff, bdfsMsg.mutable_sinfobuff()->c_str(), bdReq.InfoLen);
+				
 				//存入数据处理列表
-				m_notifFun(m_sSendSource, (void *)&bdfsMsg);
+				m_notifFun(m_sSendSource, (void *)&bdReq);
 			}
-			/*CommReq *pCommReq = new CommReq();
-			zmq_msg_t request;
-			zmq_msg_init(&request);
-			zmq_msg_recv(&request, m_pRequester, 0);
 
-			int nTotalLen = zmq_msg_size(&request);
-
-			//发送方名称
-			char sSendSource[100];
-			bzero(sSendSource, sizeof(sSendSource));
-			memcpy(sSendSource, zmq_msg_data(&request), FSF_LEGHTH);
-
-			memcpy(pCommReq, zmq_msg_data(&request) + FSF_LEGHTH + SJCD_LEGHT, PROCESS_FRAME_DATA_LENGTH);
-
-			printf("ZMQReceived\n");
-
-			//存入数据处理列表
-			m_notifFun(sSendSource, (void *)pCommReq);
-
-			delete pCommReq;
-			*/
-			//zmq_msg_close(&request);
 		}
 	}
 	return TRUE;
@@ -152,9 +142,36 @@ int CDataTransfer::RecvData()
 // 发送数据
 int CDataTransfer::SendData(char *buff,DWORD length)
 {
+
+	//添加头
+	//发送方 接收方类型	接收方	数据长度	数据
+	// 20 1	100	2	X
+	char cSendBuffer[1024];
+	bzero(cSendBuffer, sizeof(cSendBuffer));
+	DWORD nSendbufferLength = 0;
+	
+	//发送方
+	memcpy(cSendBuffer + nSendbufferLength, m_sSoftName, JSF_LEGHTH);
+	nSendbufferLength += JSF_LEGHTH;
+
+	//接收方类型 0=业务服务器软件、1=计费软件、2=北斗信息发送软件
+	cSendBuffer[nSendbufferLength++] = 2;
+
+	//接收方
+	memcpy(cSendBuffer + nSendbufferLength, m_sSendSource, FSF_LEGHTH);
+	nSendbufferLength += FSF_LEGHTH;
+
+	//数据的长度
+	sprintf(cSendBuffer + nSendbufferLength, "%d", length);
+	nSendbufferLength += SJCD_LEGHT;
+
+	//数据
+	memcpy(cSendBuffer + nSendbufferLength, buff, length);
+	nSendbufferLength += length;
+
 	zmq_msg_t reply;
-	zmq_msg_init_size(&reply, length);
-	memcpy(zmq_msg_data(&reply), buff, length);
+	zmq_msg_init_size(&reply, nSendbufferLength);
+	memcpy(zmq_msg_data(&reply), cSendBuffer, nSendbufferLength);
 	zmq_msg_send(&reply, m_pResponder, 0);
 	zmq_msg_close(&reply);
 	return TRUE;

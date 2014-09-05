@@ -2,14 +2,14 @@
 #include <unistd.h>
 #include <iostream>
 using namespace std;
-#include "DataBusiness.h"
+//#include "DataBusiness.h"
 #include "UnitsManager.h"
 #define ADDDEV "AddDev"
 #define DELDEV "DelDev"
 #define MODIFDEV "ModifDev"
 int main(int argc, char **argv)
 {
-	CDataBusiness business;
+	//CDataBusiness business;
 	CUnitsManager manger;
 	//cin.ignore();
 	while (true)

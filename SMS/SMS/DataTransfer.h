@@ -17,9 +17,9 @@ public:
 	char m_sSendSource[FSF_LEGHTH];		//发送方(软件名称)
 	int m_nRecvLength;
 	char m_nRecvBuff[PROCESS_FRAME_DATA_LENGTH];
-
+	char m_sSoftName[JSF_LEGHTH];		//接收方（本软件名称）
 	// 开启服务
-	int StartZmq(int nRequestPort, int nRespondPort, zmqNotif notifFun);
+	int StartZmq(int nRequestPort, int nRespondPort, char *pSoftName, zmqNotif notifFun);
 	// 关闭服务
 	int CloseZmq();
 

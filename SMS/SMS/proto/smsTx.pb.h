@@ -90,40 +90,40 @@ class BdfsMsg : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required int64 nSerialId = 1;
+  // required uint32 nSerialId = 1;
   inline bool has_nserialid() const;
   inline void clear_nserialid();
   static const int kNSerialIdFieldNumber = 1;
-  inline ::google::protobuf::int64 nserialid() const;
-  inline void set_nserialid(::google::protobuf::int64 value);
+  inline ::google::protobuf::uint32 nserialid() const;
+  inline void set_nserialid(::google::protobuf::uint32 value);
 
-  // required int64 nSourceAddress = 2;
+  // required uint32 nSourceAddress = 2;
   inline bool has_nsourceaddress() const;
   inline void clear_nsourceaddress();
   static const int kNSourceAddressFieldNumber = 2;
-  inline ::google::protobuf::int64 nsourceaddress() const;
-  inline void set_nsourceaddress(::google::protobuf::int64 value);
+  inline ::google::protobuf::uint32 nsourceaddress() const;
+  inline void set_nsourceaddress(::google::protobuf::uint32 value);
 
-  // required int64 nDestAddress = 3;
+  // required uint32 nDestAddress = 3;
   inline bool has_ndestaddress() const;
   inline void clear_ndestaddress();
   static const int kNDestAddressFieldNumber = 3;
-  inline ::google::protobuf::int64 ndestaddress() const;
-  inline void set_ndestaddress(::google::protobuf::int64 value);
+  inline ::google::protobuf::uint32 ndestaddress() const;
+  inline void set_ndestaddress(::google::protobuf::uint32 value);
 
-  // required int32 nMsgType = 4;
+  // required uint32 nMsgType = 4;
   inline bool has_nmsgtype() const;
   inline void clear_nmsgtype();
   static const int kNMsgTypeFieldNumber = 4;
-  inline ::google::protobuf::int32 nmsgtype() const;
-  inline void set_nmsgtype(::google::protobuf::int32 value);
+  inline ::google::protobuf::uint32 nmsgtype() const;
+  inline void set_nmsgtype(::google::protobuf::uint32 value);
 
-  // required int32 nInfoLen = 5;
+  // required uint32 nInfoLen = 5;
   inline bool has_ninfolen() const;
   inline void clear_ninfolen();
   static const int kNInfoLenFieldNumber = 5;
-  inline ::google::protobuf::int32 ninfolen() const;
-  inline void set_ninfolen(::google::protobuf::int32 value);
+  inline ::google::protobuf::uint32 ninfolen() const;
+  inline void set_ninfolen(::google::protobuf::uint32 value);
 
   // required string sInfoBuff = 6;
   inline bool has_sinfobuff() const;
@@ -154,12 +154,12 @@ class BdfsMsg : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::int64 nserialid_;
-  ::google::protobuf::int64 nsourceaddress_;
-  ::google::protobuf::int64 ndestaddress_;
-  ::google::protobuf::int32 nmsgtype_;
-  ::google::protobuf::int32 ninfolen_;
+  ::google::protobuf::uint32 nserialid_;
+  ::google::protobuf::uint32 nsourceaddress_;
+  ::google::protobuf::uint32 ndestaddress_;
+  ::google::protobuf::uint32 nmsgtype_;
   ::std::string* sinfobuff_;
+  ::google::protobuf::uint32 ninfolen_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
@@ -227,19 +227,19 @@ class FsfkMsg : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // required int64 nSerialId = 1;
+  // required uint32 nSerialId = 1;
   inline bool has_nserialid() const;
   inline void clear_nserialid();
   static const int kNSerialIdFieldNumber = 1;
-  inline ::google::protobuf::int64 nserialid() const;
-  inline void set_nserialid(::google::protobuf::int64 value);
+  inline ::google::protobuf::uint32 nserialid() const;
+  inline void set_nserialid(::google::protobuf::uint32 value);
 
-  // required int32 nRes = 2;
+  // required uint32 nRes = 2;
   inline bool has_nres() const;
   inline void clear_nres();
   static const int kNResFieldNumber = 2;
-  inline ::google::protobuf::int32 nres() const;
-  inline void set_nres(::google::protobuf::int32 value);
+  inline ::google::protobuf::uint32 nres() const;
+  inline void set_nres(::google::protobuf::uint32 value);
 
   // @@protoc_insertion_point(class_scope:FsfkMsg)
  private:
@@ -250,8 +250,8 @@ class FsfkMsg : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::int64 nserialid_;
-  ::google::protobuf::int32 nres_;
+  ::google::protobuf::uint32 nserialid_;
+  ::google::protobuf::uint32 nres_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
@@ -270,7 +270,7 @@ class FsfkMsg : public ::google::protobuf::Message {
 
 // BdfsMsg
 
-// required int64 nSerialId = 1;
+// required uint32 nSerialId = 1;
 inline bool BdfsMsg::has_nserialid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -281,18 +281,18 @@ inline void BdfsMsg::clear_has_nserialid() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void BdfsMsg::clear_nserialid() {
-  nserialid_ = GOOGLE_LONGLONG(0);
+  nserialid_ = 0u;
   clear_has_nserialid();
 }
-inline ::google::protobuf::int64 BdfsMsg::nserialid() const {
+inline ::google::protobuf::uint32 BdfsMsg::nserialid() const {
   return nserialid_;
 }
-inline void BdfsMsg::set_nserialid(::google::protobuf::int64 value) {
+inline void BdfsMsg::set_nserialid(::google::protobuf::uint32 value) {
   set_has_nserialid();
   nserialid_ = value;
 }
 
-// required int64 nSourceAddress = 2;
+// required uint32 nSourceAddress = 2;
 inline bool BdfsMsg::has_nsourceaddress() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -303,18 +303,18 @@ inline void BdfsMsg::clear_has_nsourceaddress() {
   _has_bits_[0] &= ~0x00000002u;
 }
 inline void BdfsMsg::clear_nsourceaddress() {
-  nsourceaddress_ = GOOGLE_LONGLONG(0);
+  nsourceaddress_ = 0u;
   clear_has_nsourceaddress();
 }
-inline ::google::protobuf::int64 BdfsMsg::nsourceaddress() const {
+inline ::google::protobuf::uint32 BdfsMsg::nsourceaddress() const {
   return nsourceaddress_;
 }
-inline void BdfsMsg::set_nsourceaddress(::google::protobuf::int64 value) {
+inline void BdfsMsg::set_nsourceaddress(::google::protobuf::uint32 value) {
   set_has_nsourceaddress();
   nsourceaddress_ = value;
 }
 
-// required int64 nDestAddress = 3;
+// required uint32 nDestAddress = 3;
 inline bool BdfsMsg::has_ndestaddress() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
@@ -325,18 +325,18 @@ inline void BdfsMsg::clear_has_ndestaddress() {
   _has_bits_[0] &= ~0x00000004u;
 }
 inline void BdfsMsg::clear_ndestaddress() {
-  ndestaddress_ = GOOGLE_LONGLONG(0);
+  ndestaddress_ = 0u;
   clear_has_ndestaddress();
 }
-inline ::google::protobuf::int64 BdfsMsg::ndestaddress() const {
+inline ::google::protobuf::uint32 BdfsMsg::ndestaddress() const {
   return ndestaddress_;
 }
-inline void BdfsMsg::set_ndestaddress(::google::protobuf::int64 value) {
+inline void BdfsMsg::set_ndestaddress(::google::protobuf::uint32 value) {
   set_has_ndestaddress();
   ndestaddress_ = value;
 }
 
-// required int32 nMsgType = 4;
+// required uint32 nMsgType = 4;
 inline bool BdfsMsg::has_nmsgtype() const {
   return (_has_bits_[0] & 0x00000008u) != 0;
 }
@@ -347,18 +347,18 @@ inline void BdfsMsg::clear_has_nmsgtype() {
   _has_bits_[0] &= ~0x00000008u;
 }
 inline void BdfsMsg::clear_nmsgtype() {
-  nmsgtype_ = 0;
+  nmsgtype_ = 0u;
   clear_has_nmsgtype();
 }
-inline ::google::protobuf::int32 BdfsMsg::nmsgtype() const {
+inline ::google::protobuf::uint32 BdfsMsg::nmsgtype() const {
   return nmsgtype_;
 }
-inline void BdfsMsg::set_nmsgtype(::google::protobuf::int32 value) {
+inline void BdfsMsg::set_nmsgtype(::google::protobuf::uint32 value) {
   set_has_nmsgtype();
   nmsgtype_ = value;
 }
 
-// required int32 nInfoLen = 5;
+// required uint32 nInfoLen = 5;
 inline bool BdfsMsg::has_ninfolen() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -369,13 +369,13 @@ inline void BdfsMsg::clear_has_ninfolen() {
   _has_bits_[0] &= ~0x00000010u;
 }
 inline void BdfsMsg::clear_ninfolen() {
-  ninfolen_ = 0;
+  ninfolen_ = 0u;
   clear_has_ninfolen();
 }
-inline ::google::protobuf::int32 BdfsMsg::ninfolen() const {
+inline ::google::protobuf::uint32 BdfsMsg::ninfolen() const {
   return ninfolen_;
 }
-inline void BdfsMsg::set_ninfolen(::google::protobuf::int32 value) {
+inline void BdfsMsg::set_ninfolen(::google::protobuf::uint32 value) {
   set_has_ninfolen();
   ninfolen_ = value;
 }
@@ -454,7 +454,7 @@ inline void BdfsMsg::set_allocated_sinfobuff(::std::string* sinfobuff) {
 
 // FsfkMsg
 
-// required int64 nSerialId = 1;
+// required uint32 nSerialId = 1;
 inline bool FsfkMsg::has_nserialid() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -465,18 +465,18 @@ inline void FsfkMsg::clear_has_nserialid() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void FsfkMsg::clear_nserialid() {
-  nserialid_ = GOOGLE_LONGLONG(0);
+  nserialid_ = 0u;
   clear_has_nserialid();
 }
-inline ::google::protobuf::int64 FsfkMsg::nserialid() const {
+inline ::google::protobuf::uint32 FsfkMsg::nserialid() const {
   return nserialid_;
 }
-inline void FsfkMsg::set_nserialid(::google::protobuf::int64 value) {
+inline void FsfkMsg::set_nserialid(::google::protobuf::uint32 value) {
   set_has_nserialid();
   nserialid_ = value;
 }
 
-// required int32 nRes = 2;
+// required uint32 nRes = 2;
 inline bool FsfkMsg::has_nres() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -487,13 +487,13 @@ inline void FsfkMsg::clear_has_nres() {
   _has_bits_[0] &= ~0x00000002u;
 }
 inline void FsfkMsg::clear_nres() {
-  nres_ = 0;
+  nres_ = 0u;
   clear_has_nres();
 }
-inline ::google::protobuf::int32 FsfkMsg::nres() const {
+inline ::google::protobuf::uint32 FsfkMsg::nres() const {
   return nres_;
 }
-inline void FsfkMsg::set_nres(::google::protobuf::int32 value) {
+inline void FsfkMsg::set_nres(::google::protobuf::uint32 value) {
   set_has_nres();
   nres_ = value;
 }

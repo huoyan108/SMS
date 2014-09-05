@@ -6,8 +6,7 @@
 #include "AlarmClock.h"
 #include "PareData.h"
 using namespace std;
-#include "./proto/smsTx.pb.h"
-
+#include "DataBusiness.h"
 class CUnitsManager
 {
 public:
@@ -36,7 +35,7 @@ public:
 		int nStop);
 
 	//设置发送信息
-	int SetSendMsg(BdfsMsg *pData);
+	int SetSendMsg(tagBdReq *pData);
 
 	// 控制设备发送
 	int ControlDevSend(char *Dev/*, char *buff, int size*/);
@@ -45,6 +44,8 @@ public:
 	//接收设备数据
 	friend int  RecvDevData(char *DevID, char *buff, int  len);
 protected:
+	CDataBusiness business;
+
 	//设备单元集合
 	map <string, CComUnit*>m_devMap;
 
@@ -59,11 +60,11 @@ protected:
 	CPareData m_parse;
 
 	//数据发送列表
-	list<BdfsMsg> m_dataList;
+	list<tagBdReq> m_dataList;
 
 	// 向设备单元添加发送信息,如果pData为空，从列表获取
-	//int SetDevSendMsg(char *DevID, BdfsMsg *pData = NULL);
-	int SetDevSendMsg(unsigned long nLocalId, BdfsMsg *pData = NULL);
+	//int SetDevSendMsg(char *DevID, tagBdReq *pData = NULL);
+	int SetDevSendMsg(unsigned long nLocalId, tagBdReq *pData = NULL);
 
 	// 获取设备
 	int GetComDevFromDevId(CComUnit** comDevPt, char *Dev);
