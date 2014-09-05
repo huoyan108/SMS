@@ -73,6 +73,11 @@ enum
 	MACHINE_STATUS_WORK, //正常工作
 	MACHINE_STATUS_MASK //屏蔽状态
 };
+enum {
+	BDFSREQ,    //数据请求
+	ICJCREQ,		//IC信息   
+	XTZJREQ		//自检
+};
 //自检信息
 typedef struct tagSelfCheckInfo
 {
@@ -98,6 +103,7 @@ typedef struct tagFeedbackInfo
 //数据处理结构体
 struct tagFrameData
 {
+	int nDataStyle;				
 	DWORD dwSerialID;		//发送序号
 	char pFrameData[PROCESS_FRAME_DATA_LENGTH];
 	DWORD dwFrameDataLen; //数据长度

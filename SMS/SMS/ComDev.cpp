@@ -278,7 +278,7 @@ int CComDev::RecvData()
 // 等待设备通知
 int CComDev::WaitDevNotif()
 {
-	//printf("WaitDevNotif\n");
+	printf("WaitDevNotif\n");
 	int fd; //文件描述符
 	fd = m_nFd;
 

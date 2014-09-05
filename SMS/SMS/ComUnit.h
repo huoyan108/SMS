@@ -59,9 +59,11 @@ protected:
 	//发送列表
 	map<DWORD, tagFrameData &> m_sendMsgList;
 
-	//发送序号
+	//北斗发送序号
 	DWORD m_dwSerialID;
 
+	//发送序号
+	DWORD m_nSendSeq;
 	//发送次数
 	int m_nSendTimes;
 

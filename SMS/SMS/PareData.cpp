@@ -81,8 +81,10 @@ DWORD CPareData::SendToBd_TXSQ(tagBdReq& stReq, char* pSendBuffer, DWORD &nBuffe
 	if (stReq.nMsgType == 2)
 		nReportLen += 8;
 
-	sprintf(pSendBuffer + f_iCurLen, "%d", swab16(nReportLen));
-	f_iCurLen += 2;
+	pSendBuffer[f_iCurLen] = HIBYTE(LOWORD(nReportLen));
+	f_iCurLen++;
+	pSendBuffer[f_iCurLen] = LOBYTE(LOWORD(nReportLen));
+	f_iCurLen++;	
 	//是否应答
 	pSendBuffer[f_iCurLen] = 0;
 	f_iCurLen++;
@@ -103,8 +105,8 @@ DWORD CPareData::SendToBd_TXSQ(tagBdReq& stReq, char* pSendBuffer, DWORD &nBuffe
 	memcpy(pSendBuffer + f_iCurLen, stReq.InfoBuff, f_dwTemp);
 	f_iCurLen += f_dwTemp;
 
-	sprintf(pSendBuffer + f_iCurLen, "%d", swab16(f_iCurLen + 1));
-	f_iCurLen += 2;
+	pSendBuffer[5] = HIBYTE(LOWORD(f_iCurLen + 1));//长度高字节
+	pSendBuffer[6] = LOBYTE(LOWORD(f_iCurLen + 1));//长度低字节
 
 	pSendBuffer[f_iCurLen] = ComputeCheckSum(pSendBuffer, f_iCurLen);
 	f_iCurLen++;
@@ -303,8 +305,9 @@ DWORD CPareData::SendToBd_ICJC(DWORD dwLocalID, char nFramNo, char* pSendBuffer)
 	pSendBuffer[dwIndex] = nFramNo;
 	dwIndex++;
 	//长度
-	sprintf(pSendBuffer + dwIndex, "%d", swab16(dwIndex + 1));
-	dwIndex += 2;
+	pSendBuffer[5] = HIBYTE(LOWORD(dwIndex + 1));
+	pSendBuffer[6] = LOBYTE(LOWORD(dwIndex + 1));
+	//dwIndex += 2;
 	//校验
 	pSendBuffer[dwIndex] = ComputeCheckSum(pSendBuffer, dwIndex);
 	dwIndex++;
@@ -325,11 +328,14 @@ DWORD CPareData::SendToBd_XTZJ(DWORD dwLocalID, unsigned short nSelfFre, char* p
 	pSendBuffer[dwIndex] = LOBYTE(LOWORD(dwLocalID));
 	dwIndex++;
 	//频度 
-	sprintf(pSendBuffer + dwIndex, "%d", swab16(nSelfFre));
-	dwIndex += 2;
+	pSendBuffer[dwIndex] = HIBYTE(nSelfFre);
+	dwIndex++;
+	pSendBuffer[dwIndex] = LOBYTE(nSelfFre);
+	dwIndex++;
 
-	sprintf(pSendBuffer + dwIndex, "%d", swab16(dwIndex + 1));
-	dwIndex += 2;
+	pSendBuffer[5] = HIBYTE(LOWORD(dwIndex + 1));
+	pSendBuffer[6] = LOBYTE(LOWORD(dwIndex + 1));
+
 
 	pSendBuffer[dwIndex] = ComputeCheckSum(pSendBuffer, dwIndex);
 	dwIndex++;

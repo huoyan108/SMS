@@ -19,6 +19,7 @@ CUnitsManager::CUnitsManager()
 
 CUnitsManager::~CUnitsManager()
 {
+	printf("cancle CUnitsManager\n");
 	m_AlarmClock.Stop();
 }
 
@@ -179,11 +180,12 @@ int CUnitsManager::AddComDev(char *Dev,
 
 	pthread_mutex_unlock(&g_unitsSendData_mutex);
 
+	printf("Add Dev %s Success\n", Dev);
+
 	//自检
 	SendICJC(Dev);
-	SendXTZJ(Dev, 5);
+	SendXTZJ(Dev, TIME_CHECK_SELF);
 
-	printf("Add Dev %s Success\n", Dev);
 	return TRUE;
 }
 
@@ -236,7 +238,7 @@ int CUnitsManager::ModifComDev(char *Dev,
 
 
 // 控制设备发送
-int CUnitsManager::ControlDevSend(char *Dev/*, char *buff, int size*/)
+int CUnitsManager::ControlDevSend(char *Dev)
 {
 
 	pthread_mutex_lock(&g_unitsSendData_mutex);
@@ -246,10 +248,6 @@ int CUnitsManager::ControlDevSend(char *Dev/*, char *buff, int size*/)
 	{
 		CComUnit *comDevPt = it->second;
 	
-		//CommReq Data;
-		//Data.dwFrameDataLen = 12;
-		//Data.pFrameData = { 0x24, 0x49, 0x43, 0x4A, 0x43, 0x00, 0x0C, 0x00, 0x00, 0x00, 0x00, 0x2B };
-		//comDevPt->SetSendMsg(Data);
 		comDevPt->ProcessSendMsg();
 	}
 	pthread_mutex_unlock(&g_unitsSendData_mutex);
@@ -293,6 +291,8 @@ int CUnitsManager::SetDevSendMsg(unsigned long nLocalId, tagBdReq *pData)
 	}
 	//北斗发送信息打包
 	tagFrameData FrameData;
+	FrameData.nDataStyle = BDFSREQ;
+
 	m_parse.SendToBd_TXSQ(DataTemp, FrameData.pFrameData, FrameData.dwFrameDataLen);
 	FrameData.dwSerialID = DataTemp.dwSerialID;
 
@@ -378,6 +378,7 @@ int CUnitsManager::GetComDevFromLocalId(CComUnit** comDevPt, unsigned long nLoca
 int CUnitsManager::SendICJC(char *Dev)
 {
 	tagFrameData Data;
+	Data.nDataStyle = ICJCREQ;
 	Data.dwFrameDataLen = m_parse.SendToBd_ICJC(0, 0, Data.pFrameData);
 
 	CComUnit *comDevPt = NULL;
@@ -400,6 +401,7 @@ int CUnitsManager::SendICJC(char *Dev)
 int CUnitsManager::SendXTZJ(char *Dev,int nZJPD)
 {
 	tagFrameData Data;
+	Data.nDataStyle = XTZJREQ;
 	Data.dwFrameDataLen = m_parse.SendToBd_XTZJ(0, nZJPD, Data.pFrameData);
 
 	CComUnit *comDevPt = NULL;

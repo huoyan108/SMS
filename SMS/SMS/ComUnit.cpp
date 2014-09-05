@@ -20,33 +20,9 @@ int  RecvDevData(void *object,char *DevID, char *buff, int  len)
 		{
 			FeedbackInfo stBackInfo;
 			stBackInfo = *(FeedbackInfo*)pEncodeData;
-
-
-			//如果成功删除本地发送列表(待确定,目前确认发送就删除)
-			//失败等待下次发送(待确定)
-			map<DWORD, tagFrameData &>::iterator it = me->m_sendMsgList.begin();
-			if (it != me->m_sendMsgList.end())
-			{
-				stBackInfo.dwSerialID = it->first;
-
-				//发送时间
-				time_t currtime;
-				time(&currtime);
-				stBackInfo.sendtime = currtime;
-
-				//发送次数
-				if (stBackInfo.dwSerialID == me->m_dwSerialID)
-				{
-					stBackInfo.sendtimes = me->m_nSendTimes;
-				}
-				
-
-				me->m_sendMsgList.erase(it);
-			}
-		
+					
 			//设置反馈信息
 			me->SetTXRes(stBackInfo);
-			me->m_myFun(FEEDBACK_FKXX, &stBackInfo);
 		}
 		break;
 		case CUNPACK_ICXX:
@@ -71,7 +47,7 @@ int  RecvDevData(void *object,char *DevID, char *buff, int  len)
 	return true;
 }
 
-CComUnit::CComUnit() :/*m_nSendSeq(0),*/
+CComUnit::CComUnit() :m_nSendSeq(0),
 m_myFun(0),
 m_nLocalID(0),
 m_dwSerialID(0),
@@ -82,6 +58,8 @@ m_nSendTimes(0)
 
 CComUnit::~CComUnit()
 {
+	printf("cancle CComUnit\n");
+
 }
 
 
@@ -103,12 +81,37 @@ int CComUnit::Start(char *Dev,
 }
 int CComUnit::Stop()
 {
+	printf("stop CComUnit\n");
+
 	m_comDev.Stop();
 	return TRUE;
 }
 void CComUnit::SetTXRes(FeedbackInfo &stBackInfo)
 {
 	printf("FeedbackInfo RECV Notif\n");
+
+	//如果成功删除本地发送列表
+	map<DWORD, tagFrameData &>::iterator it = m_sendMsgList.begin();
+	if (it != m_sendMsgList.end())
+	{
+		stBackInfo.dwSerialID = it->second.dwSerialID;
+
+		//发送时间
+		time_t currtime;
+		time(&currtime);
+		stBackInfo.sendtime = currtime;
+
+		//发送次数
+		if (stBackInfo.dwSerialID == m_dwSerialID)
+		{
+			stBackInfo.sendtimes = m_nSendTimes;
+		}
+
+
+		m_sendMsgList.erase(it);
+	}
+	m_myFun(FEEDBACK_FKXX, &stBackInfo);
+
 
 }
 
@@ -157,27 +160,35 @@ int CComUnit::ProcessSendMsg()
 	{
 		map<DWORD, tagFrameData &>::iterator it = m_sendMsgList.begin();
 
-		//计算发送次数
-		if (m_dwSerialID == it->first)
+		if (it->second.nDataStyle == BDFSREQ)
 		{
-			if (m_nSendTimes++ > 3)
+			//计算发送次数
+			if (m_dwSerialID == it->second.dwSerialID)
 			{
-				///删除原数据
-				m_sendMsgList.erase(it);
+				if (m_nSendTimes++ > 3)
+				{
+					///删除原数据
+					m_sendMsgList.erase(it);
+				}
+			}
+			else
+			{
+				m_dwSerialID = it->first;
+				m_nSendTimes = 0;
 			}
 		}
-		else
-		{
-			m_dwSerialID = it->first;
-			m_nSendTimes = 0;
-		}
+
+	
 
 		nRes = m_comDev.SendData((*it).second.pFrameData, (*it).second.dwFrameDataLen);
 		//推送到设备成功
 		if (nRes == TRUE)
 		{
-			////删除原数据
-			//m_sendMsgList.erase(it);
+			//如果是自检删除原数据
+			if (it->second.nDataStyle != BDFSREQ)
+			{
+				m_sendMsgList.erase(it);
+			}
 			return TRUE;
 		}
 		else
@@ -219,10 +230,10 @@ int CComUnit::SetSendMsg(tagFrameData &Data)
 	{
 		//反馈信息
 	}
-	//if (m_nSendSeq >LISTMAX)
-	//{
-	//	m_nSendSeq = 0;
-	//}
-	m_sendMsgList.insert(map<DWORD, tagFrameData &>::value_type(Data.dwSerialID, Data));
+	if (m_nSendSeq++ >LISTMAX)
+	{
+		m_nSendSeq = 0;
+	}
+	m_sendMsgList.insert(map<DWORD, tagFrameData &>::value_type(m_nSendSeq, Data));
 	return TRUE;
 }

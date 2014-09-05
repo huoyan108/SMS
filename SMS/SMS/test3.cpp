@@ -2,17 +2,17 @@
 #include <unistd.h>
 #include <iostream>
 using namespace std;
-//#include "DataBusiness.h"
 #include "UnitsManager.h"
 #define ADDDEV "AddDev"
 #define DELDEV "DelDev"
 #define MODIFDEV "ModifDev"
 int main(int argc, char **argv)
 {
-	//CDataBusiness business;
 	CUnitsManager manger;
-	//cin.ignore();
-	while (true)
+	char *dev = "/dev/ttyr01";
+	manger.AddComDev(dev, 115200, 8, 'N', 1);
+
+	/*while (true)
 	{
 		cout << "sms>";
 
@@ -41,9 +41,9 @@ int main(int argc, char **argv)
 		{
 			printf("what do you want to do ?\n");
 		}
-	}
+	}*/
 
-
+	sleep(100000);
 
 	return 1;
 }
