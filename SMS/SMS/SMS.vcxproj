@@ -69,13 +69,14 @@
     <ClInclude Include="ComDev.h" />
     <ClInclude Include="DataBusiness.h" />
     <ClInclude Include="DataTransfer.h" />
+    <ClInclude Include="debuginfo.h" />
     <ClInclude Include="IniOper.h" />
     <ClInclude Include="proto\smsTx.pb.h" />
+    <ClInclude Include="tools.h" />
     <ClInclude Include="UnitsManager.h" />
     <ClInclude Include="ComUnit.h" />
     <ClInclude Include="MsgStructInfo.h" />
     <ClInclude Include="PareData.h" />
-    <ClInclude Include="PrintMsg.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AlarmClock.cpp" />
@@ -83,13 +84,14 @@
     <ClCompile Include="DataBusiness.cpp" />
     <ClCompile Include="DataTransfer.cpp" />
     <ClCompile Include="IniOper.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="proto\smsTx.pb.cc" />
     <ClCompile Include="test2.cpp" />
     <ClCompile Include="test3.cpp" />
+    <ClCompile Include="tools.cpp" />
     <ClCompile Include="UnitsManager.cpp" />
     <ClCompile Include="ComUnit.cpp" />
     <ClCompile Include="PareData.cpp" />
-    <ClCompile Include="PrintMsg.cpp" />
     <ClCompile Include="test.cpp" />
   </ItemGroup>
   <ItemGroup>

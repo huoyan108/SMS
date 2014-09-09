@@ -8,9 +8,9 @@ using namespace std;
 #define MODIFDEV "ModifDev"
 int main(int argc, char **argv)
 {
-	CUnitsManager manger;
+	CUnitsManager *manger = new CUnitsManager;
 	char *dev = "/dev/ttyr01";
-	manger.AddComDev(dev, 115200, 8, 'N', 1);
+	manger->AddComDev(dev, 115200, 8, 'N', 1);
 
 	/*while (true)
 	{
