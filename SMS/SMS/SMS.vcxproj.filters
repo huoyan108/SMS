@@ -48,10 +48,10 @@
     <ClInclude Include="proto\smsTx.pb.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="debuginfo.h">
+    <ClInclude Include="tools.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="tools.h">
+    <ClInclude Include="debuginfo.cpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

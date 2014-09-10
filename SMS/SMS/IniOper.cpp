@@ -9,6 +9,68 @@ CIniOper::CIniOper()
 CIniOper::~CIniOper()
 {
 }
+int  CIniOper::loadComDev(char *filename, vector<COM_DEV_TAG> &devArr)
+{
+	lua_State *L = luaL_newstate();
+	luaL_openlibs(L);
+
+	if (luaL_loadfile(L, filename) || lua_pcall(L, 0, 0, 0))
+	{
+		return -1;
+	}
+	
+	//串口参数数量
+	lua_getglobal(L, "count");
+	if (!lua_isnumber(L, -1))
+	{
+		return -1;
+	}
+	int nCount = 0;
+	nCount = (int)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+
+
+	lua_getglobal(L, "devs");
+	if (!lua_istable(L, -1))
+	{
+		return -1;
+	}
+
+	//lua_pushnumber(L,1);
+	//lua_gettable(L, -2);
+
+	//if (!lua_isstring(L, -1))
+	//{
+	//	return -1;
+	//}
+	//COM_DEV_TAG devTag;
+
+	//sprintf(devTag.Dev, "%s", (char *)lua_tostring(L, -1));
+	//获取子table
+	for (int i = 0; i < nCount; i++)
+	{
+		lua_pushnumber(L, i + 1); //参数
+
+		lua_gettable(L, -2);  //去table查找
+
+		if (!lua_istable(L, -1))	//结果是不是一个子table
+		{
+			return -1;
+		}
+		//获取子table内容
+		COM_DEV_TAG devTag;
+		if (GetDevTableValue(L, devTag, 1) != 0)
+		{
+			return -1;
+		}
+		devArr.insert(devArr.begin(), devTag);
+		lua_pop(L, 1);	//干掉子table
+	}
+	lua_pop(L, 1);	//干掉table
+
+	lua_close(L);
+	return 0;
+}
 
 int  CIniOper::load(char *filename, int *nRequestPort, int *nRespondPort, char *pSoftName)
 {
@@ -48,10 +110,12 @@ int  CIniOper::load(char *filename, int *nRequestPort, int *nRespondPort, char *
 	*nRequestPort = (int)lua_tonumber(L, -3);
 	*nRespondPort = (int)lua_tonumber(L, -2);
 	sprintf(pSoftName, "%s", (char *)lua_tostring(L, -1));
+	lua_pop(L, 3);
 
 	lua_close(L);
 	return 0;
 }
+
 int  CIniOper::load(char *filename, char *dbhost, char * dbport, char * dbname, char * dbuser, char * dbpwd)
 {
 	lua_State *L = luaL_newstate();
@@ -106,6 +170,7 @@ int  CIniOper::load(char *filename, char *dbhost, char * dbport, char * dbname, 
 	sprintf(dbport, "%s", (char *)lua_tostring(L, -4));
 	sprintf(dbhost, "%s", (char *)lua_tostring(L, -5));
 
+	lua_pop(L, 5);
 
 	lua_close(L);
 	return 0;
@@ -133,4 +198,57 @@ int CIniOper::GetSoftPath(char *cPath,int nSize)
 		}
 	}
 	return -1;
+}
+
+
+// 获取设备参数table的内容
+int CIniOper::GetDevTableValue(lua_State *L, COM_DEV_TAG &devTag,int tablePos)
+{
+	//dev
+	lua_pushstring(L, "dev"); //参数
+	lua_gettable(L, -2);  //去table查找
+	if (!lua_isstring(L, -1))	
+	{
+		return -1;
+	}
+	sprintf(devTag.Dev, "%s", (char *)lua_tostring(L, -1));
+	lua_pop(L, 1);
+
+	lua_pushstring(L, "speed"); //参数
+	lua_gettable(L, -2);  //去table查找
+	if (!lua_isnumber(L, -1))
+	{
+		return -1;
+	}
+	devTag.nSpeed = (int)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+
+	lua_pushstring(L, "bits"); //参数
+	lua_gettable(L, -2);  //去table查找
+	if (!lua_isnumber(L, -1))
+	{
+		return -1;
+	}
+	devTag.nBits = (int)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+
+	lua_pushstring(L, "event"); //参数
+	lua_gettable(L, -2);  //去table查找
+	if (!lua_isstring(L, -1))
+	{
+		return -1;
+	}
+	sprintf(&devTag.nEvent, "%s", (char *)lua_tostring(L, -1));
+	//devTag.nEvent = (char)lua_tostring(L, -1));
+	lua_pop(L, 1);
+
+	lua_pushstring(L, "stop"); //参数
+	lua_gettable(L, -2);  //去table查找
+	if (!lua_isnumber(L, -1))
+	{
+		return -1;
+	}
+	devTag.nStop = (int)lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	return 0;
 }
