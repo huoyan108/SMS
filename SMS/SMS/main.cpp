@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 			//生成子进程
 			for (;;) 
 			{
-				//SE_DEBUG(DEBUG_JOBS, "Supervisor process %d is starting", getpid());
+				SE_DEBUG(DEBUG_JOBS, "Supervisor process %d is starting", getpid());
 				fv = fork();
 				if (fv < 0) {
 					sleep(60);
@@ -126,14 +126,15 @@ int main(int argc, char **argv)
 			{ 
 				for (;;) {
 					fv = wait(&status);
-					if (WIFEXITED(status)) {
-						//SE_DEBUG(DEBUG_JOBS, "Worker process %d is exited normally with code %d", fv, status);
+					if (WIFEXITED(status)) 
+					{
+						DEBUG_INFO(DEBUG_2, "Worker process %d is exited normally with code %d", fv, status);
 						/* child terminated normally, supervisor exit. */
 						exit(0);
 					}
 					sleep(0);
 					if (fv > 0) {
-						//SE_DEBUG(DEBUG_JOBS, "Worker process %d is exited abnormally with code %d, supervisor will be restarted it auto", fv, status);
+						DEBUG_INFO(DEBUG_2, "Worker process %d is exited abnormally with code %d, supervisor will be restarted it auto", fv, status);
 						break;
 					}
 				}
