@@ -52,10 +52,10 @@ void *threadZMQRecv(void *arg)
 {
 	pthread_detach(pthread_self());
 
-	int state, oldstate;
+	//int state, oldstate;
 
-	state = PTHREAD_CANCEL_DEFERRED;
-	pthread_setcancelstate(state, &oldstate);
+	//state = PTHREAD_CANCEL_DEFERRED;
+	//pthread_setcancelstate(state, &oldstate);
 
 	CDataTransfer *me = (CDataTransfer *)arg;
 	while (true)

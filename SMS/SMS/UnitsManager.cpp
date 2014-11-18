@@ -180,6 +180,47 @@ int CUnitsManager::AddComDev(char *Dev,
 
 	pthread_mutex_unlock(&g_unitsSendData_mutex);
 
+	//配置文件
+	CIniOper ini;
+	char cPath[1000];
+
+	bzero(cPath, sizeof(cPath));
+	if (ini.GetSoftPath(cPath, sizeof(cPath)) != 0)
+	{
+		return -1;
+	}
+	strcat(cPath, "readDevConf.lua");
+
+	//读取全部
+	vector<COM_DEV_TAG> devArr;
+	if (ini.loadComDev(cPath, devArr) != 0)
+	{
+
+		printf("config file error!\n");
+
+	}
+	//写入
+	bzero(cPath, sizeof(cPath));
+	if (ini.GetSoftPath(cPath, sizeof(cPath)) != 0)
+	{
+		return -1;
+	}
+	strcat(cPath, "writeDevConf.lua");
+	//保存
+	COM_DEV_TAG comDevTag;
+	sprintf(comDevTag.Dev,"%s",Dev);
+	comDevTag.nSpeed = nSpeed;
+	comDevTag.nBits = nBits;
+	comDevTag.nEvent = nEvent;
+	comDevTag.nStop = nStop;
+	devArr.insert(devArr.begin(), comDevTag);
+	for (vector<COM_DEV_TAG>::iterator it = devArr.begin(); it != devArr.end(); it++)
+	{
+		COM_DEV_TAG devtag = *it;
+		ini.SaveComDev(cPath, devtag);
+	}
+
+
 	printf("Add Dev %s Success\n", Dev);
 
 	//自检
@@ -210,6 +251,43 @@ int CUnitsManager::DelComDev(char *Dev)
 	}
 	pthread_mutex_unlock(&g_unitsSendData_mutex);
 
+
+	//配置文件
+	CIniOper ini;
+	char cPath[1000];
+
+	bzero(cPath, sizeof(cPath));
+	if (ini.GetSoftPath(cPath, sizeof(cPath)) != 0)
+	{
+		return -1;
+	}
+	strcat(cPath, "readDevConf.lua");
+
+	//读取全部
+	vector<COM_DEV_TAG> devArr;
+	if (ini.loadComDev(cPath, devArr) != 0)
+	{
+
+		printf("config file error!\n");
+
+	}
+	//写入
+	bzero(cPath, sizeof(cPath));
+	if (ini.GetSoftPath(cPath, sizeof(cPath)) != 0)
+	{
+		return -1;
+	}
+	strcat(cPath, "writeDevConf.lua");
+	//保存
+	for (vector<COM_DEV_TAG>::iterator it = devArr.begin(); it != devArr.end(); it++)
+	{
+		COM_DEV_TAG devtag = *it;
+		if (memcmp(devtag.Dev, Dev, sizeof(Dev)) != 0)
+		{
+			continue;
+		}
+		ini.SaveComDev(cPath, devtag);
+	}
 	printf("Del Dev %s Success\n", Dev);
 
 	return TRUE;

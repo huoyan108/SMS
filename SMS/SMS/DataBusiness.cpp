@@ -88,10 +88,10 @@ void *threadBusiess(void *arg)
 {
 	pthread_detach(pthread_self());
 
-	int state, oldstate;
+	//int state, oldstate;
 
-	state = PTHREAD_CANCEL_DEFERRED;
-	pthread_setcancelstate(state, &oldstate);
+	//state = PTHREAD_CANCEL_DEFERRED;
+	//pthread_setcancelstate(state, &oldstate);
 
 	CDataBusiness *me = (CDataBusiness *)arg;
 	while (true)
@@ -168,13 +168,22 @@ int CDataBusiness::ProcessBusiess()
 			FeedbackInfo.FeedResult);
 		m_db.Exec(sSql);
 
-		//打包
+		/*//打包
 		parseData.SendToDS_FKXX(FeedbackInfo.dwSerialID,
 			FeedbackInfo.FeedResult,
 			cSendBuff, 
 			nSendLength);
 		//发送
-		m_treansfer.SendData(cSendBuff, nSendLength);
+		m_treansfer.SendData(cSendBuff, nSendLength);*/
+		//打包
+		FsfkMsg fsfkMsg;
+		fsfkMsg.set_nserialid(FeedbackInfo.dwSerialID);
+		fsfkMsg.set_nres(atoi(FeedbackInfo.FeedResult));
+
+		string sBuff = "";
+		fsfkMsg.SerializeToString(&sBuff);
+		//发送
+		m_treansfer.SendData((char*)sBuff.c_str(), sBuff.length());
 	}
 	return TRUE;
 }

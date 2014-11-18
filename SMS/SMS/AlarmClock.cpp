@@ -62,10 +62,10 @@ void *threadProcess(void *arg)
 	pthread_detach(pthread_self());
 	//printf("ProcessTimerThreadID: %ld\n", pthread_self());
 
-	int state, oldstate;
+	//int state, oldstate;
 
-	state = PTHREAD_CANCEL_DEFERRED;
-	pthread_setcancelstate(state, &oldstate);
+	//state = PTHREAD_CANCEL_DEFERRED;
+	//pthread_setcancelstate(state, &oldstate);
 
 	CAlarmClock *me = (CAlarmClock *)arg;
 	while (true)

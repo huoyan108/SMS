@@ -39,9 +39,18 @@ public:
 	int load(char *filename, int *nRequestPort, int *nRespondPort,char *pSoftName);
 	int load(char *filename, char *dbhost, char * dbport, char * dbname, char * dbuser, char * dbpwd);
 	int loadComDev(char *filename, vector<COM_DEV_TAG> &devArr);
-	
+	int loadComDev1(char *filename, vector<COM_DEV_TAG> &devArr);
+
 protected:
 	// 获取设备参数table的内容
 	int GetDevTableValue(lua_State *L, COM_DEV_TAG &devTag,int tablePos);
+public:
+	// 保存设备信息
+	int SaveComDev(char *filename, COM_DEV_TAG &devTag);
+	
+	int setDevCom(lua_State *L, COM_DEV_TAG &devTag);
+	int SetField(lua_State *L, const char *index, const char *sValue);
+	int SetField(lua_State *L, const char *index, const int nValue);
+	void error(lua_State *L, const char *fmt, ...);
 };
 

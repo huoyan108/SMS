@@ -98,6 +98,7 @@
     <Text Include="CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="bulid\dev.lua" />
     <None Include="bulid\ini.lua" />
     <None Include="proto\smsTx.proto" />
   </ItemGroup>

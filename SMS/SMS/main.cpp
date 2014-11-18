@@ -91,13 +91,13 @@ int main(int argc, char **argv)
 	{
 		exit(0);
 	}
-	strcat(cPath, "dev.lua");
+	strcat(cPath, "readDevConf.lua");
 
 	vector<COM_DEV_TAG> devArr;
 	if (ini.loadComDev(cPath, devArr) != 0)
 	{
 		
-		printf("config file error!\n");
+		printf("no comdev config\n");
 
 	}
 
@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 			//生成子进程
 			for (;;) 
 			{
-				SE_DEBUG(DEBUG_JOBS, "Supervisor process %d is starting", getpid());
+				DEBUG_INFO(DEBUG_2, "Supervisor process %d is starting", getpid());
 				fv = fork();
 				if (fv < 0) {
 					sleep(60);

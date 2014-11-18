@@ -7,6 +7,7 @@
 #include "PareData.h"
 using namespace std;
 #include "DataBusiness.h"
+#include "IniOper.h"
 class CUnitsManager
 {
 public:
